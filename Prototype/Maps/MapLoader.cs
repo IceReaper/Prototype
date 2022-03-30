@@ -10,7 +10,6 @@ using Stride.Rendering.Colors;
 using Stride.Rendering.Lights;
 using Stride.Rendering.Materials;
 using Stride.Rendering.Materials.ComputeColors;
-using Stride.Rendering.Skyboxes;
 
 public static class MapLoader
 {
@@ -20,7 +19,6 @@ public static class MapLoader
 			entity.Dispose();
 
 		MapLoader.LoadSun(map, scene);
-		MapLoader.LoadSkybox(graphicsContext, serviceRegistry, map, scene);
 
 		foreach (var (offset, slice) in map.Slices)
 		{
@@ -53,28 +51,6 @@ public static class MapLoader
 
 		entity.Transform.Rotation = map.SunDirection;
 		scene.Entities.Add(entity);
-	}
-
-	private static void LoadSkybox(GraphicsContext graphicsContext, IServiceRegistry serviceRegistry, Map map, Scene scene)
-	{
-		/*using var textureStream = File.OpenRead($"Assets/Skyboxes/{map.Skybox}.png");
-		var texture = Texture.Load(graphicsContext.CommandList.GraphicsDevice, textureStream);
-
-		scene.Entities.Add(
-			new()
-			{
-				new BackgroundComponent
-				{
-					Texture = CubemapFromTextureRenderer.GenerateCubemap(
-						serviceRegistry,
-						new(serviceRegistry, RenderContext.GetShared(serviceRegistry), graphicsContext),
-						texture,
-						texture.Width
-					),
-					Intensity = map.SkyboxIntensity
-				}
-			}
-		);*/
 	}
 
 	private static void LoadBlocks(GraphicsContext graphicsContext, Slice slice, Scene scene, Vector3 offset)

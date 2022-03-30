@@ -92,8 +92,6 @@ public static class LegacyMapConverter
 				SunAmbient = new(20, 40, 60),
 				SunDirectional = new(40, 80, 120),
 				SunDirection = Quaternion.RotationX(MathUtil.DegreesToRadians(-45.0f)) * Quaternion.RotationY(MathUtil.DegreesToRadians(135.0f)),
-				Skybox = "default",
-				SkyboxIntensity = 0.01f,
 				Slices =
 				{
 					{

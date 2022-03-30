@@ -1,5 +1,6 @@
 ﻿namespace Prototype;
 
+using Entities.Components;
 using Maps;
 using Maps.FileFormats;
 using Stride.Engine;
@@ -15,13 +16,15 @@ public class PrototypeGame : Game
 
 		this.SceneSystem.SceneInstance = new(this.Services, new());
 
-		this.SceneSystem.SceneInstance.RootScene.Entities.Add(
-			new()
-			{
-				new CameraComponent { Projection = CameraProjectionMode.Perspective, Slot = this.SceneSystem.GraphicsCompositor.Cameras[0].ToSlotId() },
-				new BasicCameraController()
-			}
-		);
+		var camera = new Entity
+		{
+			new CameraComponent { Projection = CameraProjectionMode.Perspective, Slot = this.SceneSystem.GraphicsCompositor.Cameras[0].ToSlotId() },
+			new CameraControllerComponent()
+		};
+
+		camera.Transform.Position = new(117, 16, 215);
+
+		this.SceneSystem.SceneInstance.RootScene.Entities.Add(camera);
 
 		const string mapName = "bil";
 

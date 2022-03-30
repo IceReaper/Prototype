@@ -8,8 +8,6 @@ public class Map
 	public Color SunAmbient;
 	public Color SunDirectional;
 	public Quaternion SunDirection;
-	public float SkyboxIntensity = 1;
-	public string Skybox = string.Empty;
 
 	public readonly Dictionary<Vector3, Slice> Slices = new();
 
@@ -21,9 +19,7 @@ public class Map
 		{
 			SunAmbient = reader.ReadColor(),
 			SunDirectional = reader.ReadColor(),
-			SunDirection = reader.ReadQuaternion(),
-			SkyboxIntensity = reader.ReadSingle(),
-			Skybox = reader.ReadString()
+			SunDirection = reader.ReadQuaternion()
 		};
 
 		var numSlices = reader.ReadInt32();
@@ -41,8 +37,6 @@ public class Map
 		writer.Write(map.SunAmbient);
 		writer.Write(map.SunDirectional);
 		writer.Write(map.SunDirection);
-		writer.Write(map.SkyboxIntensity);
-		writer.Write(map.Skybox);
 		writer.Write(map.Slices.Count);
 
 		foreach (var (offset, slice) in map.Slices)
