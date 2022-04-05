@@ -19,7 +19,7 @@ public class Player : SyncScript
 	private float movespeed = 5f;
 	private float elapsedTime = 0;
 
-	private List<Vector3> path;
+	private readonly List<Vector3> path = new ();
 
 	public override void Start()
 	{
@@ -27,7 +27,6 @@ public class Player : SyncScript
 		this.CreatePlayerModel();
 		this.Entity.Transform.Position = new(118, 3, 211); 
 		this.movementEnd = this.Entity.Transform.Position;
-		this.path = new();
 	}
 
 	public override void Update()
@@ -50,7 +49,7 @@ public class Player : SyncScript
 		{
 			//this.Movement(); 
 			//Console.WriteLine("Entity is at: " + this.Entity.Transform.Position);
-			this.UseWayPoints();
+			this.UseWayPointsWhile();
 		}
 
 	}
@@ -59,13 +58,13 @@ public class Player : SyncScript
 	{
 		this.playerModel = new();
 		this.Entity.GetOrCreate<ModelComponent>().Model = this.playerModel;		
-		this.playerModel.Meshes.Add(new() {Draw = GeometricPrimitive.Capsule.New(this.GraphicsDevice,4f,1f,1).ToMeshDraw()});
+		this.playerModel.Meshes.Add(new() {Draw = GeometricPrimitive.Capsule.New(this.GraphicsDevice,1f,0.25f,1).ToMeshDraw()});
 	}
 
 	private void Movement() //direct movement without waypoints
 	{
 		var deltaTime = (float)this.Game.UpdateTime.Elapsed.TotalSeconds;
-
+  
 		var start = this.Entity.Transform.Position;
 		var end = this.movementEnd;
 
@@ -74,26 +73,7 @@ public class Player : SyncScript
 
 		this.Entity.Transform.Position += direction * Math.Min(this.movespeed * deltaTime, distance);
 	}
-
-	private void UseWayPoints()
-	{
-		if (this.path.Count == 0)
-			return;
-
-		var deltaTime = (float)this.Game.UpdateTime.Elapsed.TotalSeconds;
-
-		var start = this.Entity.Transform.Position;
-		var end = this.path[0];
-
-		var distance = (end - start).Length();
-		var direction = Vector3.Normalize(end - start);
-
-		this.Entity.Transform.Position += direction * Math.Min(this.movespeed * deltaTime, distance);
-            
-		if (distance == 0)
-			this.path.RemoveAt(0);
-	}
-
+	
 	private void UseWayPointsWhile()
 	{
 		while (this.path.Count > 0)
