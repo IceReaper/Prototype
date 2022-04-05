@@ -351,7 +351,7 @@ public static class LegacyMapConverter
 
 		if (block.Up?.Material == waterTile)
 		{
-			liquid = new() { ShapeType = block.ShapeType, Color = Color.Aqua};
+			liquid = new() { ShapeType = block.ShapeType, Color = Color.Aqua };
 			block.Up = null;
 		}
 		else

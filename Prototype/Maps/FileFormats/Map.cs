@@ -15,12 +15,7 @@ public class Map
 	{
 		var reader = new BinaryReader(stream);
 
-		var map = new Map
-		{
-			SunAmbient = reader.ReadColor(),
-			SunDirectional = reader.ReadColor(),
-			SunDirection = reader.ReadQuaternion()
-		};
+		var map = new Map { SunAmbient = reader.ReadColor(), SunDirectional = reader.ReadColor(), SunDirection = reader.ReadQuaternion() };
 
 		var numSlices = reader.ReadInt32();
 
