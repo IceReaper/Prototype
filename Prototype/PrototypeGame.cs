@@ -11,6 +11,7 @@ using Stride.Rendering;
 
 public class PrototypeGame : Game
 {
+
 	protected override void BeginRun()
 	{
 		this.Window.AllowUserResizing = true;
@@ -19,7 +20,7 @@ public class PrototypeGame : Game
 
 		this.SceneSystem.SceneInstance = new(this.Services, new());
 
-		var camera = new Entity
+		var camera = new Entity()
 		{
 			new CameraComponent { Projection = CameraProjectionMode.Perspective, Slot = this.SceneSystem.GraphicsCompositor.Cameras[0].ToSlotId() },
 			new CameraControllerComponent(),
@@ -41,6 +42,16 @@ public class PrototypeGame : Game
 		character.Transform.Position = new(119, 3, 210);
 		this.SceneSystem.SceneInstance.RootScene.Entities.Add(character);
 
+		this.CreatePlayer();
 		base.BeginRun();
+	}
+	
+	public void CreatePlayer()
+	{
+		var player = new Entity();
+		player.Add(new Player());
+		player.Transform.Position = new(119, 3, 211);
+		this.SceneSystem.SceneInstance.RootScene.Entities.Add(player);
+
 	}
 }

@@ -13,6 +13,9 @@ public class WorldCursorComponent : SyncScript
 	private CameraComponent? camera;
 	private Entity? debugSphere;
 
+	public Vector3 VirtualMousePosition;
+
+
 	public override void Start()
 	{
 		this.camera = this.Entity.Components.OfType<CameraComponent>().FirstOrDefault();
@@ -34,7 +37,10 @@ public class WorldCursorComponent : SyncScript
 			this.position = WorldCursorComponent.GetWorldPosition(this.Input.MousePosition, this.camera);
 
 		if (this.debugSphere != null)
+		{
 			this.debugSphere.Transform.Position = this.position;
+			this.VirtualMousePosition = this.debugSphere.Transform.Position; //No direct Mouseinput, instead use virtualmouse.
+		}
 	}
 
 	private static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
