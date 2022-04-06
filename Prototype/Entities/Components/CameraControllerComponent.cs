@@ -1,4 +1,4 @@
-﻿namespace Prototype.Components;
+﻿namespace Prototype.Entities.Components;
 
 using Stride.Core.Mathematics;
 using Stride.Engine;
@@ -23,8 +23,7 @@ public class CameraControllerComponent : SyncScript
 
 	public override void Start()
 	{
-		this.cameraComponent = this.Entity.Components.OfType<CameraComponent>().FirstOrDefault();
-		base.Start();
+		this.cameraComponent = this.Entity.GetAll<CameraComponent>().FirstOrDefault();
 	}
 
 	public override void Update()
@@ -155,13 +154,13 @@ public class CameraControllerComponent : SyncScript
 		this.Entity.Transform.Position += Vector3.Transform(finalMovement, Quaternion.RotationYawPitchRoll(this.rotation, 0, 0));
 		this.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.rotation, MathHelper.ToRadians(CameraControllerComponent.Angle), 0);
 
-		if (this.cameraComponent != null)
-		{
-			this.cameraComponent.VerticalFieldOfView = Math.Clamp(
-				this.cameraComponent.VerticalFieldOfView - zoom,
-				CameraControllerComponent.ZoomMin,
-				CameraControllerComponent.ZoomMax
-			);
-		}
+		if (this.cameraComponent == null)
+			return;
+
+		this.cameraComponent.VerticalFieldOfView = Math.Clamp(
+			this.cameraComponent.VerticalFieldOfView - zoom,
+			CameraControllerComponent.ZoomMin,
+			CameraControllerComponent.ZoomMax
+		);
 	}
 }

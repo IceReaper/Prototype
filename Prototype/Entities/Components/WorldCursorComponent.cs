@@ -1,45 +1,36 @@
-namespace Prototype.Components;
+namespace Prototype.Entities.Components;
 
+using Extensions;
 using Stride.Core.Mathematics;
 using Stride.Engine;
-using Stride.Extensions;
-using Stride.Graphics.GeometricPrimitives;
-using Stride.Rendering;
+using Stride.Input;
 using System.Runtime.InteropServices;
 
 public class WorldCursorComponent : SyncScript
 {
-	private Vector3 position;
-	private CameraComponent? camera;
-	private Entity? debugSphere;
-
-	public Vector3 VirtualMousePosition;
-
-
-	public override void Start()
-	{
-		this.camera = this.Entity.Components.OfType<CameraComponent>().FirstOrDefault();
-
-		this.debugSphere = new()
-		{
-			new ModelComponent { Model = new() { new Mesh { Draw = GeometricPrimitive.Sphere.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() } } }
-		};
-
-		this.SceneSystem.SceneInstance.RootScene.Entities.Add(this.debugSphere);
-	}
-
 	public override void Update()
 	{
-		if (this.camera == null)
+		var cameraEntity = this.SceneSystem.GetAll(nameof(Camera)).FirstOrDefault();
+		var camera = cameraEntity?.Components.OfType<CameraComponent>().FirstOrDefault();
+
+		if (camera == null)
 			return;
 
 		if (this.Input.HasMouse)
-			this.position = WorldCursorComponent.GetWorldPosition(this.Input.MousePosition, this.camera);
+			this.Entity.Transform.Position = WorldCursorComponent.GetWorldPosition(this.Input.MousePosition, camera);
 
-		if (this.debugSphere != null)
+		// TODO this must be refactored into an order system.
+		var characters = this.SceneSystem.GetAll(nameof(Character)).SelectMany(entity => entity.GetAll<CharacterComponent>()).ToArray();
+
+		if (this.Input.IsMouseButtonPressed(MouseButton.Left))
 		{
-			this.debugSphere.Transform.Position = this.position;
-			this.VirtualMousePosition = this.debugSphere.Transform.Position; //No direct Mouseinput, instead use virtualmouse.
+			foreach (var character in characters)
+				character.Path.Add(this.Entity.Transform.Position);
+		}
+		else if (this.Input.IsMouseButtonPressed(MouseButton.Right))
+		{
+			foreach (var character in characters)
+				character.Path.Clear();
 		}
 	}
 
