@@ -83,64 +83,28 @@ public static class LegacyMapConverter
 		if (!styChunks.TryGetValue(LegacyMapConverter.TileCatalogMagic, out var tileCatalogStream))
 			throw new($"SpriteBank is missing {LegacyMapConverter.TileCatalogMagic} chunk");
 
-		using var mapSteam = File.Open($"{path}.map", FileMode.Create);
+		var tileUsages = new List<TileUsage>();
+		using var mapStream = File.Open($"{path}.map", FileMode.Create);
 
 		Map.Write(
-			mapSteam,
+			mapStream,
 			new()
 			{
 				SunAmbient = new(20, 40, 60),
 				SunDirectional = new(40, 80, 120),
 				SunDirection = Quaternion.RotationX(MathUtil.DegreesToRadians(-45.0f)) * Quaternion.RotationY(MathUtil.DegreesToRadians(135.0f)),
-				Slices =
-				{
-					{
-						Vector3.Zero,
-						LegacyMapConverter.ImportSlice(
-							graphicsContext,
-							path,
-							geometryStream,
-							paletteMappingsStream,
-							paletteCatalogStream,
-							tileCatalogStream,
-							lightStream,
-							waterTile
-						)
-					}
-				}
+				Cells = LegacyMapConverter.ImportGeometry(geometryStream, tileUsages, waterTile),
+				TileSet = LegacyMapConverter.ImportTileSet(
+					graphicsContext,
+					paletteMappingsStream,
+					paletteCatalogStream,
+					tileCatalogStream,
+					tileUsages,
+					Path.GetFileName(path)
+				),
+				Lights = LegacyMapConverter.ImportLights(lightStream).ToList()
 			}
 		);
-	}
-
-	private static Slice ImportSlice(
-		GraphicsContext graphicsContext,
-		string path,
-		Stream geometryStream,
-		Stream paletteMappingsStream,
-		Stream paletteCatalogStream,
-		Stream tileCatalogStream,
-		Stream lightStream,
-		int waterTile
-	)
-	{
-		var tileUsages = new List<TileUsage>();
-
-		var slice = new Slice
-		{
-			Cells = LegacyMapConverter.ImportGeometry(geometryStream, tileUsages, waterTile),
-			TileSet = LegacyMapConverter.ImportTileSet(
-				graphicsContext,
-				paletteMappingsStream,
-				paletteCatalogStream,
-				tileCatalogStream,
-				tileUsages,
-				Path.GetFileName(path)
-			)
-		};
-
-		slice.Lights.AddRange(LegacyMapConverter.ImportLights(lightStream));
-
-		return slice;
 	}
 
 	private static Cell[,,] ImportGeometry(Stream stream, List<TileUsage> tileUsages, int waterTile)

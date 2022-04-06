@@ -6,14 +6,14 @@ using Stride.Graphics;
 
 public static class TileSetBuilder
 {
-	public static int TilesPerDirection(Slice slice)
+	public static int TilesPerDirection(Map map)
 	{
-		return MathUtil.NextPowerOfTwo((int)Math.Ceiling(Math.Sqrt(slice.TileSet.Tiles.Count)));
+		return MathUtil.NextPowerOfTwo((int)Math.Ceiling(Math.Sqrt(map.TileSet.Tiles.Count)));
 	}
 
-	public static Texture Build(GraphicsContext graphicsContext, Slice slice)
+	public static Texture Build(GraphicsContext graphicsContext, Map map)
 	{
-		var textures = slice.TileSet.Tiles.Select(
+		var textures = map.TileSet.Tiles.Select(
 				texture =>
 				{
 					using var stream = File.OpenRead($"Assets/Textures/{texture}_diffuse.png");
@@ -23,7 +23,7 @@ public static class TileSetBuilder
 			)
 			.ToArray();
 
-		var tilesPerDirection = TileSetBuilder.TilesPerDirection(slice);
+		var tilesPerDirection = TileSetBuilder.TilesPerDirection(map);
 
 		var tileWidth = MathUtil.NextPowerOfTwo(textures.Max(texture => texture.Description.Width));
 		var tileHeight = MathUtil.NextPowerOfTwo(textures.Max(texture => texture.Description.Width));
@@ -33,7 +33,7 @@ public static class TileSetBuilder
 
 		var tileSet = new uint[textureWidth * textureHeight];
 
-		for (var i = 0; i < slice.TileSet.Tiles.Count; i++)
+		for (var i = 0; i < map.TileSet.Tiles.Count; i++)
 		{
 			var tileX = i % tilesPerDirection;
 			var tileY = i / tilesPerDirection;

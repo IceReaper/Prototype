@@ -87,18 +87,18 @@ public static class Geometry
 		}
 	}
 
-	public static (VertexBufferBinding, IndexBufferBinding) BuildBlocks(GraphicsDevice graphicsDevice, Slice slice, Vector3 offset)
+	public static (VertexBufferBinding, IndexBufferBinding) BuildBlocks(GraphicsDevice graphicsDevice, Map map)
 	{
 		var vertices = new List<VertexPositionNormalTextureDepth>();
 
-		for (var z = 0; z < slice.Cells.GetLength(2); z++)
-		for (var y = 0; y < slice.Cells.GetLength(1); y++)
-		for (var x = 0; x < slice.Cells.GetLength(0); x++)
+		for (var z = 0; z < map.Cells.GetLength(2); z++)
+		for (var y = 0; y < map.Cells.GetLength(1); y++)
+		for (var x = 0; x < map.Cells.GetLength(0); x++)
 		{
-			var block = slice.Cells[x, y, z].Block;
+			var block = map.Cells[x, y, z].Block;
 
 			if (block != null)
-				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[block.ShapeType].BuildBlock(slice, block), offset + new Vector3(x, y, z)));
+				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[block.ShapeType].BuildBlock(map, block), new(x, y, z)));
 		}
 
 		var indices = Enumerable.Range(0, vertices.Count).ToArray();
@@ -114,18 +114,18 @@ public static class Geometry
 		);
 	}
 
-	public static (VertexBufferBinding, IndexBufferBinding) BuildLiquids(GraphicsDevice graphicsDevice, Slice slice, Vector3 offset)
+	public static (VertexBufferBinding, IndexBufferBinding) BuildLiquids(GraphicsDevice graphicsDevice, Map map)
 	{
 		var vertices = new List<VertexPositionNormalColor>();
 
-		for (var z = 0; z < slice.Cells.GetLength(2); z++)
-		for (var y = 0; y < slice.Cells.GetLength(1); y++)
-		for (var x = 0; x < slice.Cells.GetLength(0); x++)
+		for (var z = 0; z < map.Cells.GetLength(2); z++)
+		for (var y = 0; y < map.Cells.GetLength(1); y++)
+		for (var x = 0; x < map.Cells.GetLength(0); x++)
 		{
-			var liquid = slice.Cells[x, y, z].Liquid;
+			var liquid = map.Cells[x, y, z].Liquid;
 
 			if (liquid != null)
-				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[liquid.ShapeType].BuildLiquid(liquid), offset + new Vector3(x, y, z)));
+				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[liquid.ShapeType].BuildLiquid(liquid), new(x, y, z)));
 		}
 
 		var indices = Enumerable.Range(0, vertices.Count).ToArray();
@@ -139,12 +139,12 @@ public static class Geometry
 		return vertices.Select(vertex => new VertexPositionNormalColor(vertex.Position + offset, vertex.Normal, vertex.Color));
 	}
 
-	public static IEnumerable<VertexPositionNormalTextureDepth> Build(Slice slice, IEnumerable<VertexPositionNormalTexture> vertices, Side? side, bool inner)
+	public static IEnumerable<VertexPositionNormalTextureDepth> Build(Map map, IEnumerable<VertexPositionNormalTexture> vertices, Side? side, bool inner)
 	{
 		if (side == null)
 			return Array.Empty<VertexPositionNormalTextureDepth>();
 
-		var tilesPerDirection = TileSetBuilder.TilesPerDirection(slice);
+		var tilesPerDirection = TileSetBuilder.TilesPerDirection(map);
 
 		var x = side.Material % tilesPerDirection;
 		var y = side.Material / tilesPerDirection;

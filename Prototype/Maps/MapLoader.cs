@@ -1,8 +1,7 @@
 ﻿namespace Prototype.Maps;
 
+using Entities;
 using FileFormats;
-using Stride.Core;
-using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Graphics;
 using Stride.Rendering;
@@ -13,52 +12,42 @@ using Stride.Rendering.Materials.ComputeColors;
 
 public static class MapLoader
 {
-	public static void Load(GraphicsContext graphicsContext, ServiceRegistry serviceRegistry, Map map, Scene scene)
+	public static void Load(Game game, Map map)
 	{
-		foreach (var entity in scene.Entities.Where(entity => !entity.Components.GetAll<CameraComponent>().Any()))
-			entity.Dispose();
+		MapLoader.LoadSun(game, map);
+		MapLoader.LoadBlocks(game, map);
+		MapLoader.LoadLiquids(game, map);
+		MapLoader.LoadLights(game, map);
+	}
 
-		MapLoader.LoadSun(map, scene);
+	private static void LoadSun(Game game, Map map)
+	{
+		var entity = Sun.Create(game);
+		entity.Transform.Rotation = map.SunDirection;
 
-		foreach (var (offset, slice) in map.Slices)
+		foreach (var lightComponent in entity.GetAll<LightComponent>())
 		{
-			MapLoader.LoadBlocks(graphicsContext, slice, scene, offset);
-			MapLoader.LoadLiquids(graphicsContext, slice, scene, offset);
-			MapLoader.LoadLights(slice, scene, offset);
+			switch (lightComponent.Type)
+			{
+				case LightAmbient lightAmbient:
+					lightAmbient.Color = new ColorRgbProvider(map.SunAmbient);
+
+					break;
+
+				case LightDirectional lightDirectional:
+					lightDirectional.Color = new ColorRgbProvider(map.SunDirectional);
+
+					break;
+			}
 		}
 	}
 
-	private static void LoadSun(Map map, Scene scene)
+	private static void LoadBlocks(Game game, Map map)
 	{
-		scene.Entities.Add(new() { new LightComponent { Type = new LightAmbient { Color = new ColorRgbProvider(map.SunAmbient) } } });
+		var texture = TileSetBuilder.Build(game.GraphicsContext, map);
+		var (vertexBuffer, indexBuffer) = Geometry.BuildBlocks(game.GraphicsDevice, map);
 
-		var entity = new Entity
-		{
-			new LightComponent
-			{
-				Type = new LightDirectional
-				{
-					Color = new ColorRgbProvider(map.SunDirectional),
-					Shadow =
-					{
-						Enabled = true,
-						Size = LightShadowMapSize.XLarge,
-						Filter = new LightShadowMapFilterTypePcf { FilterSize = LightShadowMapFilterTypePcfSize.Filter7x7 }
-					}
-				}
-			}
-		};
-
-		entity.Transform.Rotation = map.SunDirection;
-		scene.Entities.Add(entity);
-	}
-
-	private static void LoadBlocks(GraphicsContext graphicsContext, Slice slice, Scene scene, Vector3 offset)
-	{
-		var texture = TileSetBuilder.Build(graphicsContext, slice);
-		var (vertexBuffer, indexBuffer) = Geometry.BuildBlocks(graphicsContext.CommandList.GraphicsDevice, slice, offset);
-
-		scene.Entities.Add(
+		game.SceneSystem.SceneInstance.RootScene.Entities.Add(
 			new()
 			{
 				new ModelComponent(
@@ -67,11 +56,11 @@ public static class MapLoader
 						new Mesh
 						{
 							Draw = new() { VertexBuffers = new[] { vertexBuffer }, IndexBuffer = indexBuffer, DrawCount = indexBuffer.Count },
-							BoundingBox = new(new(0, 0, 0), new(slice.Cells.GetLength(0), slice.Cells.GetLength(1), slice.Cells.GetLength(2)))
+							BoundingBox = new(new(0, 0, 0), new(map.Cells.GetLength(0), map.Cells.GetLength(1), map.Cells.GetLength(2)))
 						},
 						new MaterialInstance(
 							Material.New(
-								graphicsContext.CommandList.GraphicsDevice,
+								game.GraphicsDevice,
 								new()
 								{
 									Attributes =
@@ -91,11 +80,11 @@ public static class MapLoader
 		);
 	}
 
-	private static void LoadLiquids(GraphicsContext graphicsContext, Slice slice, Scene scene, Vector3 offset)
+	private static void LoadLiquids(Game game, Map map)
 	{
-		var (vertexBuffer, indexBuffer) = Geometry.BuildLiquids(graphicsContext.CommandList.GraphicsDevice, slice, offset);
+		var (vertexBuffer, indexBuffer) = Geometry.BuildLiquids(game.GraphicsDevice, map);
 
-		scene.Entities.Add(
+		game.SceneSystem.SceneInstance.RootScene.Entities.Add(
 			new()
 			{
 				new ModelComponent(
@@ -104,11 +93,11 @@ public static class MapLoader
 						new Mesh
 						{
 							Draw = new() { VertexBuffers = new[] { vertexBuffer }, IndexBuffer = indexBuffer, DrawCount = indexBuffer.Count },
-							BoundingBox = new(new(0, 0, 0), new(slice.Cells.GetLength(0), slice.Cells.GetLength(1), slice.Cells.GetLength(2)))
+							BoundingBox = new(new(0, 0, 0), new(map.Cells.GetLength(0), map.Cells.GetLength(1), map.Cells.GetLength(2)))
 						},
 						new MaterialInstance(
 							Material.New(
-								graphicsContext.CommandList.GraphicsDevice,
+								game.GraphicsDevice,
 								new()
 								{
 									Attributes =
@@ -125,20 +114,23 @@ public static class MapLoader
 		);
 	}
 
-	private static void LoadLights(Slice slice, Scene scene, Vector3 offset)
+	private static void LoadLights(Game game, Map map)
 	{
-		foreach (var light in slice.Lights)
+		foreach (var light in map.Lights)
 		{
-			var entity = new Entity
-			{
-				new LightComponent
-				{
-					Intensity = light.Intensity, Type = new LightPoint { Color = new ColorRgbProvider(light.Color), Radius = light.Radius }
-				}
-			};
+			var entity = PointLight.Create(game);
+			entity.Transform.Position = light.Position;
 
-			entity.Transform.Position = offset + light.Position;
-			scene.Entities.Add(entity);
+			foreach (var lightComponent in entity.GetAll<LightComponent>())
+			{
+				lightComponent.Intensity = light.Intensity;
+
+				if (lightComponent.Type is not LightPoint lightPoint)
+					continue;
+
+				lightPoint.Color = new ColorRgbProvider(light.Color);
+				lightPoint.Radius = light.Radius;
+			}
 		}
 	}
 }

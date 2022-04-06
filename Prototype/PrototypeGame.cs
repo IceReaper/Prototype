@@ -21,7 +21,7 @@ public class PrototypeGame : Game
 		if (!File.Exists($"Assets/Maps/{mapName}.map") || true)
 			LegacyMapConverter.Import(this.GraphicsContext, $"Assets/Maps/{mapName}", 608);
 
-		MapLoader.Load(this.GraphicsContext, this.Services, Map.Read(File.OpenRead($"Assets/Maps/{mapName}.map")), this.SceneSystem.SceneInstance.RootScene);
+		MapLoader.Load(this, Map.Read(File.OpenRead($"Assets/Maps/{mapName}.map")));
 
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);
