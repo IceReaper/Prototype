@@ -1,6 +1,5 @@
 namespace Prototype.Pathfinding;
 
-using System.Numerics;
 
 public class Pathfinding
 {
@@ -12,14 +11,11 @@ public class Pathfinding
 	//add costs for different speed terrain
 	//private const int MOVE_STRAIGT_COST_ROAD - cheaper to go on road because the unit walks on roads faster. Togglable for RTS.
 
-	private readonly Grid<PathNode> grid;
+	private readonly Grid grid;
 
-	private List<PathNode> openList;
-	private List<PathNode> closedList;
-
-	public Pathfinding(int width, int height)
+	public Pathfinding(Grid grid)
 	{
-		this.grid = new(width, height, 10f, Vector3.Zero, (g, x, y) => new(g, x, y));
+		this.grid = grid;
 	}
 
 	public List<PathNode> FindPath(int startX, int startY, int endX, int endY)
@@ -28,15 +24,22 @@ public class Pathfinding
 		var startNode = this.grid.GetGridObject(startX, startY);
 		var endNode = this.grid.GetGridObject(endX, endY);
 
-		this.openList = new() { startNode };
-		this.closedList = new();
+		if (startNode == null || endNode == null)
+			return new();
+
+		var openList = new List<PathNode> { startNode };
+		var closedList = new List<PathNode>();
 
 		//set initial cost of the nodes:
-		for (var x = 0; x < this.grid.GetWidth(); x++)
+		for (var x = 0; x < this.grid.Width; x++)
 		{
-			for (var y = 0; y < this.grid.GetHeight(); y++)
+			for (var y = 0; y < this.grid.Height; y++)
 			{
 				var pathNode = this.grid.GetGridObject(x, y);
+
+				if (pathNode == null)
+					continue;
+
 				pathNode.GCost = int.MaxValue;
 				pathNode.CalculateFCost();
 				pathNode.CameFromNode = null;
@@ -49,9 +52,9 @@ public class Pathfinding
 		startNode.CalculateFCost();
 
 		//openList are all not yet checked nodes. If all nodes were checked and no path was returned, than there is no path.
-		while (this.openList.Count > 0)
+		while (openList.Count > 0)
 		{
-			var currentNode = this.GetLowestFCostNode(this.openList);
+			var currentNode = this.GetLowestFCostNode(openList);
 
 			if (currentNode == endNode)
 			{
@@ -60,15 +63,15 @@ public class Pathfinding
 			}
 
 			//checked nodes are moved into the closedList
-			this.openList.Remove(currentNode);
-			this.closedList.Add(currentNode);
+			openList.Remove(currentNode);
+			closedList.Add(currentNode);
 
 			//check the neighbours of the current node (list is created and returned):
-			foreach (var neighbourNode in this.GetNeighbourList(currentNode).Where(neighbourNode => !this.closedList.Contains(neighbourNode)))
+			foreach (var neighbourNode in this.GetNeighbourList(currentNode).Where(neighbourNode => !closedList.Contains(neighbourNode)))
 			{
 				if (!neighbourNode.IsWalkable)
 				{
-					this.closedList.Add(neighbourNode);
+					closedList.Add(neighbourNode);
 
 					continue;
 				}
@@ -83,37 +86,14 @@ public class Pathfinding
 				neighbourNode.HCost = this.CalculateDistanceCost(neighbourNode, endNode);
 				neighbourNode.CalculateFCost();
 
-				if (!this.openList.Contains(neighbourNode))
-					this.openList.Add(neighbourNode);
+				if (!openList.Contains(neighbourNode))
+					openList.Add(neighbourNode);
 			}
 		}
 
 		//Out of nodes on the openList
-		return null;
+		return new();
 	}
-
-	/* 
-	public List<Vector3> FindPath(Vector3 startWorldPosition, Vector3 endWorldPosition)
-	{
-		this.grid.GetSpecificCell(startWorldPosition, out var startX, out var startY);
-		this.grid.GetSpecificCell(endWorldPosition, out var endX, out var endY);
-
-		var path = this.FindPath(startX, startY, endX, endY);
-
-		if (path == null)
-			return null;
-		else
-		{
-			var vectorPath = new List<Vector3>();
-
-			foreach (var pathNode in path)
-				vectorPath.Add(new Vector3(pathNode.X, 0, pathNode.Y) * this.grid.GetCellSize() + new Vector3(1, 0, 1) * this.grid.GetCellSize() * .5f);
-
-			return vectorPath;
-		}
-	}
-
-	*/
 
 	//Precalculate alle neighbours when the grid is created. 
 	private IEnumerable<PathNode> GetNeighbourList(PathNode currentNode)
@@ -128,11 +108,11 @@ public class Pathfinding
 				yield return this.GetNode(currentNode.X - 1, currentNode.Y - 1);
 
 			//Left Up
-			if (currentNode.Y + 1 < this.grid.GetHeight())
+			if (currentNode.Y + 1 < this.grid.Height)
 				yield return this.GetNode(currentNode.X - 1, currentNode.Y + 1);
 		}
 
-		if (currentNode.X + 1 < this.grid.GetWidth())
+		if (currentNode.X + 1 < this.grid.Width)
 		{
 			//Right
 			yield return this.GetNode(currentNode.X + 1, currentNode.Y);
@@ -142,7 +122,7 @@ public class Pathfinding
 				yield return this.GetNode(currentNode.X + 1, currentNode.Y - 1);
 
 			//Right Up
-			if (currentNode.Y + 1 < this.grid.GetHeight())
+			if (currentNode.Y + 1 < this.grid.Height)
 				yield return this.GetNode(currentNode.X + 1, currentNode.Y + 1);
 		}
 
@@ -151,13 +131,13 @@ public class Pathfinding
 			yield return this.GetNode(currentNode.X, currentNode.Y - 1);
 
 		//Up
-		if (currentNode.Y + 1 < this.grid.GetHeight())
+		if (currentNode.Y + 1 < this.grid.Height)
 			yield return this.GetNode(currentNode.X, currentNode.Y + 1);
 	}
 
-	public PathNode GetNode(int x, int y)
+	private PathNode GetNode(int x, int y)
 	{
-		return this.grid.GetGridObject(x, y);
+		return this.grid.GetGridObject(x, y)!;
 	}
 
 	private List<PathNode> CalculatePath(PathNode endNode)

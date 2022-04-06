@@ -2,7 +2,7 @@ namespace Prototype.Pathfinding;
 
 public class PathNode
 {
-	private readonly Grid<PathNode> grid;
+	private readonly Grid grid;
 	public readonly int X;
 	public readonly int Y;
 
@@ -14,9 +14,9 @@ public class PathNode
 	// Bool for blocking the cell
 	public bool IsWalkable;
 
-	public PathNode CameFromNode; //previous Node
+	public PathNode? CameFromNode; //previous Node
 
-	public PathNode(Grid<PathNode> grid, int x, int y)
+	public PathNode(Grid grid, int x, int y)
 	{
 		this.grid = grid;
 		this.X = x;
@@ -27,7 +27,7 @@ public class PathNode
 	public void SetIsWalkable(bool isWalkable)
 	{
 		this.IsWalkable = isWalkable;
-		this.grid.TriggerGridObjectChanged(this.X, this.Y);
+		this.grid.TriggerGridObjectChanged(this.X, this.Y, this);
 	}
 
 	public void CalculateFCost()

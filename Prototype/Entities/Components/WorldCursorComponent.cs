@@ -1,6 +1,7 @@
 namespace Prototype.Entities.Components;
 
 using Extensions;
+using Pathfinding;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Input;
@@ -21,20 +22,23 @@ public class WorldCursorComponent : SyncScript
 
 		// TODO this must be refactored into an order system.
 		var characters = this.SceneSystem.GetAll(nameof(Character)).SelectMany(entity => entity.GetAll<CharacterComponent>()).ToArray();
+		var debugGrid = this.SceneSystem.GetAll(nameof(GridDebug)).SelectMany(entity => entity.GetAll<DebugGrid>()).FirstOrDefault();
 
 		if (this.Input.IsMouseButtonPressed(MouseButton.Left))
 		{
 			foreach (var character in characters)
-				character.Path.Add(this.Entity.Transform.Position);
+			{
+				if (debugGrid == null)
+					character.Path.Add(this.Entity.Transform.Position);
+				else
+					character.Path.AddRange(debugGrid.FindPath(character.Entity.Transform.Position, this.Entity.Transform.Position));
+			}
 		}
-		else if (this.Input.IsMouseButtonPressed(MouseButton.Right))
-		{
-			foreach (var character in characters)
-				character.Path.Clear();
-		}
+		else if (this.Input.IsMouseButtonPressed(MouseButton.Right) && debugGrid != null)
+			debugGrid.ToggleWalkable(this.Entity.Transform.Position);
 	}
 
-	private static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
+	public static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
 	{
 		var plane = new Plane(new(0, -2, 0), new Vector3(0, 1, 0));
 
