@@ -5,6 +5,7 @@ using Rendering.Depth;
 using Shapes;
 using Stride.Core.Mathematics;
 using Stride.Graphics;
+using Stride.Rendering;
 
 public static class Geometry
 {
@@ -87,24 +88,38 @@ public static class Geometry
 		}
 	}
 
-	public static (VertexBufferBinding, IndexBufferBinding) BuildBlocks(GraphicsDevice graphicsDevice, Map map)
+	public static Model? BuildBlocks(GraphicsDevice graphicsDevice, Map map, int layer, MaterialInstance materialInstance)
 	{
 		var vertices = new List<VertexPositionNormalTextureDepth>();
 
 		for (var z = 0; z < map.Cells.GetLength(2); z++)
-		for (var y = 0; y < map.Cells.GetLength(1); y++)
 		for (var x = 0; x < map.Cells.GetLength(0); x++)
 		{
-			var block = map.Cells[x, y, z].Block;
+			var block = map.Cells[x, layer, z].Block;
 
 			if (block != null)
-				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[block.ShapeType].BuildBlock(map, block), new(x, y, z)));
+				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[block.ShapeType].BuildBlock(map, block), new(x, 0, z)));
 		}
 
-		var indices = Enumerable.Range(0, vertices.Count).ToArray();
+		if (vertices.Count == 0)
+			return null;
 
-		return (new(Buffer.New(graphicsDevice, vertices.ToArray(), BufferFlags.VertexBuffer), VertexPositionNormalTextureDepth.Layout, vertices.Count),
-			new(Buffer.New(graphicsDevice, indices, BufferFlags.IndexBuffer), true, indices.Length));
+		var indices = Enumerable.Range(0, vertices.Count).ToArray();
+		var min = new Vector3(float.MaxValue);
+		var max = new Vector3(float.MinValue);
+
+		foreach (var vertex in vertices)
+		{
+			min = new(Math.Min(vertex.Position.X, min.X), 0, Math.Min(vertex.Position.Z, min.Z));
+			max = new(Math.Max(vertex.Position.X, max.X), 1, Math.Max(vertex.Position.Z, max.Z));
+		}
+
+		return Geometry.BuildModel(
+			new(Buffer.New(graphicsDevice, vertices.ToArray(), BufferFlags.VertexBuffer), VertexPositionNormalTextureDepth.Layout, vertices.Count),
+			new(Buffer.New(graphicsDevice, indices, BufferFlags.IndexBuffer), true, indices.Length),
+			new(min, max),
+			materialInstance
+		);
 	}
 
 	private static IEnumerable<VertexPositionNormalTextureDepth> ApplyOffset(IEnumerable<VertexPositionNormalTextureDepth> vertices, Vector3 offset)
@@ -114,24 +129,56 @@ public static class Geometry
 		);
 	}
 
-	public static (VertexBufferBinding, IndexBufferBinding) BuildLiquids(GraphicsDevice graphicsDevice, Map map)
+	public static Model? BuildLiquids(GraphicsDevice graphicsDevice, Map map, int layer, MaterialInstance materialInstance)
 	{
 		var vertices = new List<VertexPositionNormalColor>();
 
 		for (var z = 0; z < map.Cells.GetLength(2); z++)
-		for (var y = 0; y < map.Cells.GetLength(1); y++)
 		for (var x = 0; x < map.Cells.GetLength(0); x++)
 		{
-			var liquid = map.Cells[x, y, z].Liquid;
+			var liquid = map.Cells[x, layer, z].Liquid;
 
 			if (liquid != null)
-				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[liquid.ShapeType].BuildLiquid(liquid), new(x, y, z)));
+				vertices.AddRange(Geometry.ApplyOffset(Geometry.Shapes[liquid.ShapeType].BuildLiquid(liquid), new(x, 0, z)));
 		}
 
-		var indices = Enumerable.Range(0, vertices.Count).ToArray();
+		if (vertices.Count == 0)
+			return null;
 
-		return (new(Buffer.New(graphicsDevice, vertices.ToArray(), BufferFlags.VertexBuffer), VertexPositionNormalColor.Layout, vertices.Count),
-			new(Buffer.New(graphicsDevice, indices, BufferFlags.IndexBuffer), true, indices.Length));
+		var indices = Enumerable.Range(0, vertices.Count).ToArray();
+		var min = new Vector3(float.MaxValue);
+		var max = new Vector3(float.MinValue);
+
+		foreach (var vertex in vertices)
+		{
+			min = new(Math.Min(vertex.Position.X, min.X), 0, Math.Min(vertex.Position.Z, min.Z));
+			max = new(Math.Max(vertex.Position.X, max.X), 1, Math.Max(vertex.Position.Z, max.Z));
+		}
+
+		return Geometry.BuildModel(
+			new(Buffer.New(graphicsDevice, vertices.ToArray(), BufferFlags.VertexBuffer), VertexPositionNormalColor.Layout, vertices.Count),
+			new(Buffer.New(graphicsDevice, indices, BufferFlags.IndexBuffer), true, indices.Length),
+			new(min, max),
+			materialInstance
+		);
+	}
+
+	private static Model BuildModel(
+		VertexBufferBinding vertexBuffer,
+		IndexBufferBinding indexBuffer,
+		BoundingBox boundingBox,
+		MaterialInstance materialInstance
+	)
+	{
+		return new()
+		{
+			new Mesh
+			{
+				Draw = new() { VertexBuffers = new[] { vertexBuffer }, IndexBuffer = indexBuffer, DrawCount = indexBuffer.Count },
+				BoundingBox = boundingBox
+			},
+			materialInstance
+		};
 	}
 
 	private static IEnumerable<VertexPositionNormalColor> ApplyOffset(IEnumerable<VertexPositionNormalColor> vertices, Vector3 offset)
