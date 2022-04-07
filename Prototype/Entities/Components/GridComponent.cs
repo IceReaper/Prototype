@@ -9,53 +9,56 @@ using Stride.Rendering;
 using Stride.Rendering.Materials;
 using Stride.Rendering.Materials.ComputeColors;
 
-public class DebugGrid : StartupScript
+public class GridComponent : StartupScript
 {
 	private Grid? grid;
+	private Model[,] models = new Model[0, 0];
 
 	public override void Start()
 	{
-		this.InitializeGrid();
-	}
-
-	private void InitializeGrid()
-	{
 		this.grid = new(20, 20, (g, x, y) => new(g, x, y));
+		this.models = new Model[this.grid.Width, this.grid.Height];
+
+		var materialFree = Material.New(
+			this.GraphicsDevice,
+			new()
+			{
+				Attributes =
+				{
+					Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.White)), DiffuseModel = new MaterialDiffuseLambertModelFeature()
+				}
+			}
+		);
+
+		var materialBlocked = Material.New(
+			this.GraphicsDevice,
+			new()
+			{
+				Attributes =
+				{
+					Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.Red)), DiffuseModel = new MaterialDiffuseLambertModelFeature()
+				}
+			}
+		);
 
 		for (var x = 0; x < this.grid.Width; x++)
 		for (var y = 0; y < this.grid.Height; y++)
 		{
-			var copyX = x;
-			var copyY = y;
+			var debugcube = new Entity
+			{
+				new ModelComponent(
+					this.models[x, y] = new() { new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() }, materialFree }
+				)
+			};
 
-			var model = new Model { new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() } };
-
-			var debugcube = new Entity { new ModelComponent(model) };
 			debugcube.Transform.Position = new(x + .5f, 0, y + .5f);
 			this.Entity.AddChild(debugcube);
-
-			this.grid.OnGridValueChanged += (_, args) =>
-			{
-				if (args.X == copyX && args.Y == copyY)
-				{
-					var material = Material.New(
-						this.GraphicsDevice,
-						new()
-						{
-							Attributes =
-							{
-								Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(args.PathNode.IsWalkable ? Color.White : Color.Red)), DiffuseModel = new MaterialDiffuseLambertModelFeature()
-							}
-						}
-					);
-
-					if (model.Materials.Count == 0)
-						model.Add(material);
-					else
-						model.Materials[0] = material;
-				}
-			};
 		}
+
+		this.grid.OnGridValueChanged += (_, args) =>
+		{
+			this.models[args.X, args.Y].Materials[0] = args.PathNode.IsWalkable ? materialFree : materialBlocked;
+		};
 	}
 
 	public IEnumerable<Vector3> FindPath(Vector3 start, Vector3 end)
@@ -65,9 +68,8 @@ public class DebugGrid : StartupScript
 
 		start -= this.Entity.Transform.Position;
 		end -= this.Entity.Transform.Position;
-		var pathfinding = new Pathfinding(this.grid);
 
-		return pathfinding.FindPath((int)start.X, (int)start.Z, (int)end.X, (int)end.Z)
+		return new Pathfinding(this.grid).FindPath((int)start.X, (int)start.Z, (int)end.X, (int)end.Z)
 			.Select(pathNode => new Vector3(pathNode.X + .5f, start.Y, pathNode.Y + .5f) + this.Entity.Transform.Position);
 	}
 

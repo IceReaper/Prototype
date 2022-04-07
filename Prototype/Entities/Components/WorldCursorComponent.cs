@@ -1,7 +1,6 @@
 namespace Prototype.Entities.Components;
 
 using Extensions;
-using Pathfinding;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Input;
@@ -22,7 +21,7 @@ public class WorldCursorComponent : SyncScript
 
 		// TODO this must be refactored into an order system.
 		var characters = this.SceneSystem.GetAll(nameof(Character)).SelectMany(entity => entity.GetAll<CharacterComponent>()).ToArray();
-		var debugGrid = this.SceneSystem.GetAll(nameof(GridDebug)).SelectMany(entity => entity.GetAll<DebugGrid>()).FirstOrDefault();
+		var debugGrid = this.SceneSystem.GetAll(nameof(WorldGrid)).SelectMany(entity => entity.GetAll<GridComponent>()).FirstOrDefault();
 
 		if (this.Input.IsMouseButtonPressed(MouseButton.Left))
 		{

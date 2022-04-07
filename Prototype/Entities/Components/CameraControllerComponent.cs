@@ -88,6 +88,23 @@ public class CameraControllerComponent : SyncScript
 			if (this.Input.IsKeyDown(Keys.E))
 				rotation += 1;
 
+			if (this.Input.IsKeyDown(Keys.F1))
+				this.SetVisibleLayers(1);
+			else if (this.Input.IsKeyDown(Keys.F2))
+				this.SetVisibleLayers(2);
+			else if (this.Input.IsKeyDown(Keys.F3))
+				this.SetVisibleLayers(3);
+			else if (this.Input.IsKeyDown(Keys.F4))
+				this.SetVisibleLayers(4);
+			else if (this.Input.IsKeyDown(Keys.F5))
+				this.SetVisibleLayers(5);
+			else if (this.Input.IsKeyDown(Keys.F6))
+				this.SetVisibleLayers(6);
+			else if (this.Input.IsKeyDown(Keys.F7))
+				this.SetVisibleLayers(7);
+			else if (this.Input.IsKeyDown(Keys.F8))
+				this.SetVisibleLayers(8);
+
 			if (this.Input.IsKeyDown(Keys.LeftShift) || this.Input.IsKeyDown(Keys.RightShift))
 				keyboardDir *= CameraControllerComponent.PanFastFactor;
 
@@ -162,5 +179,12 @@ public class CameraControllerComponent : SyncScript
 			CameraControllerComponent.ZoomMin,
 			CameraControllerComponent.ZoomMax
 		);
+	}
+
+	private void SetVisibleLayers(int layers)
+	{
+		foreach (var entity in this.SceneSystem.SceneInstance.RootScene.Entities.Where(entity => entity.Name == nameof(Layer)))
+		foreach (var modelComponent in entity.Components.OfType<ModelComponent>())
+			modelComponent.Enabled = entity.Transform.Position.Y < layers;
 	}
 }
