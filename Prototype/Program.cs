@@ -13,7 +13,8 @@ foreach (var directory in Directory.GetDirectories("data/db").Select(e => e.Repl
 }
 
 // TODO under osx-arm64 however the runtime generated db files are in another location
-Directory.Delete("local", true);
+if (Directory.Exists("local"))
+	Directory.Delete("local", true);
 
 using var prototype = new PrototypeGame();
 prototype.Run();

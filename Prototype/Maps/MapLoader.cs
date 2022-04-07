@@ -109,7 +109,7 @@ public static class MapLoader
 			modelComponent.Model.Add(blocksModel);
 
 		modelComponent.Model = blocksModel;
-		
+
 		entity.Add(modelComponent);
 	}
 

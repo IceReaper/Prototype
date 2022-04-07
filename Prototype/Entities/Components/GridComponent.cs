@@ -13,13 +13,15 @@ public class GridComponent : StartupScript
 {
 	private Grid? grid;
 	private Model[,] models = new Model[0, 0];
+	private Material? materialFree;
+	private Material? materialBlocked;
 
 	public override void Start()
 	{
-		this.grid = new(20, 20, (g, x, y) => new(g, x, y));
+		this.grid = new(20, 20);
 		this.models = new Model[this.grid.Width, this.grid.Height];
 
-		var materialFree = Material.New(
+		this.materialFree = Material.New(
 			this.GraphicsDevice,
 			new()
 			{
@@ -30,7 +32,7 @@ public class GridComponent : StartupScript
 			}
 		);
 
-		var materialBlocked = Material.New(
+		this.materialBlocked = Material.New(
 			this.GraphicsDevice,
 			new()
 			{
@@ -47,18 +49,16 @@ public class GridComponent : StartupScript
 			var debugcube = new Entity
 			{
 				new ModelComponent(
-					this.models[x, y] = new() { new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() }, materialFree }
+					this.models[x, y] = new()
+					{
+						new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() }, this.materialFree
+					}
 				)
 			};
 
 			debugcube.Transform.Position = new(x + .5f, 0, y + .5f);
 			this.Entity.AddChild(debugcube);
 		}
-
-		this.grid.OnGridValueChanged += (_, args) =>
-		{
-			this.models[args.X, args.Y].Materials[0] = args.PathNode.IsWalkable ? materialFree : materialBlocked;
-		};
 	}
 
 	public IEnumerable<Vector3> FindPath(Vector3 start, Vector3 end)
@@ -66,11 +66,13 @@ public class GridComponent : StartupScript
 		if (this.grid == null)
 			return Array.Empty<Vector3>();
 
-		start -= this.Entity.Transform.Position;
-		end -= this.Entity.Transform.Position;
+		var startX = (int)(start.X - this.Entity.Transform.Position.X);
+		var startY = (int)(start.Z - this.Entity.Transform.Position.Z);
+		var endX = (int)(end.X - this.Entity.Transform.Position.X);
+		var endY = (int)(end.Z - this.Entity.Transform.Position.Z);
 
-		return new Pathfinding(this.grid).FindPath((int)start.X, (int)start.Z, (int)end.X, (int)end.Z)
-			.Select(pathNode => new Vector3(pathNode.X + .5f, start.Y, pathNode.Y + .5f) + this.Entity.Transform.Position);
+		return PathFinder.FindPath(this.grid, startX, startY, endX, endY)
+			.Select(cell => new Vector3(cell.X + .5f, 0, cell.Y + .5f) + this.Entity.Transform.Position);
 	}
 
 	public void ToggleWalkable(Vector3 origin)
@@ -78,8 +80,15 @@ public class GridComponent : StartupScript
 		if (this.grid == null)
 			return;
 
-		origin -= this.Entity.Transform.Position;
+		var x = (int)(origin.X - this.Entity.Transform.Position.X);
+		var y = (int)(origin.Z - this.Entity.Transform.Position.Z);
 
-		this.grid.ToggleWalkable((int)origin.X, (int)origin.Z);
+		var cell = this.grid.GetCell(x, y);
+
+		if (cell == null)
+			return;
+
+		cell.IsBlocked = !cell.IsBlocked;
+		this.models[x, y].Materials[0] = cell.IsBlocked ? this.materialBlocked : this.materialFree;
 	}
 }

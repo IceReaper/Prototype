@@ -3,7 +3,6 @@
 using Entities;
 using Maps;
 using Maps.FileFormats;
-using Pathfinding;
 using Stride.Engine;
 
 public class PrototypeGame : Game
