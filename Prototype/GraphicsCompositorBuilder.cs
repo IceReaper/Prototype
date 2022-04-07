@@ -1,6 +1,7 @@
 ﻿namespace Prototype;
 
 using Stride.Core.Mathematics;
+using Stride.Particles.Rendering;
 using Stride.Rendering;
 using Stride.Rendering.Background;
 using Stride.Rendering.Compositing;
@@ -10,6 +11,7 @@ using Stride.Rendering.Lights;
 using Stride.Rendering.Materials;
 using Stride.Rendering.Shadows;
 using Stride.Rendering.Sprites;
+using Stride.Rendering.UI;
 
 public static class GraphicsCompositorBuilder
 {
@@ -130,6 +132,20 @@ public static class GraphicsCompositorBuilder
 				new BackgroundRenderFeature
 				{
 					RenderStageSelectors = { new SimpleGroupToRenderStageSelector { RenderStage = opaqueRenderStage, EffectName = "Test" } }
+				},
+				new UIRenderFeature
+				{
+					RenderStageSelectors = { new SimpleGroupToRenderStageSelector { RenderStage = transparentRenderStage, EffectName = "Test" } }
+				},
+				new ParticleEmitterRenderFeature
+				{
+					RenderStageSelectors =
+					{
+						new ParticleEmitterTransparentRenderStageSelector
+						{
+							OpaqueRenderStage = opaqueRenderStage, TransparentRenderStage = transparentRenderStage
+						}
+					}
 				}
 			},
 			Game = new SceneCameraRenderer { Child = singleView, Camera = cameraSlot },
