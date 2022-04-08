@@ -23,5 +23,7 @@ public class PrototypeGame : Game
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);
 		Character.Create(this).Transform.Position = new(119, 3, 210);
+
+		UnitSelector.Create(this);
 	}
 }
