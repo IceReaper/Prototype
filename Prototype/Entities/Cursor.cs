@@ -12,7 +12,7 @@ public static class Cursor
 	{
 		var entity = new Entity(nameof(Cursor))
 		{
-			new WorldCursorComponent(),
+			new CursorComponent(),
 			new ModelComponent { Model = new() { new Mesh { Draw = GeometricPrimitive.Sphere.New(game.GraphicsDevice).ToMeshDraw() } } }
 		};
 

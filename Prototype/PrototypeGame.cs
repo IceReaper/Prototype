@@ -22,8 +22,8 @@ public class PrototypeGame : Game
 		MapLoader.Load(this, Map.Read(File.OpenRead($"Assets/Maps/{mapName}.map")));
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);
-		Character.Create(this).Transform.Position = new(119, 3, 210);
-
 		UnitSelector.Create(this);
+		Character.Create(this).Transform.Position = new(119, 3, 210);
+		Character.Create(this).Transform.Position = new(122, 3, 210);
 	}
 }

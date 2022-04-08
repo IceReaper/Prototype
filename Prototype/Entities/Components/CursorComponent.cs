@@ -6,8 +6,11 @@ using Stride.Engine;
 using Stride.Input;
 using System.Runtime.InteropServices;
 
-public class WorldCursorComponent : SyncScript
+public class CursorComponent : SyncScript
 {
+	private bool left;
+	private bool right;
+
 	public override void Update()
 	{
 		var cameraEntity = this.SceneSystem.GetAll(nameof(Camera)).FirstOrDefault();
@@ -17,14 +20,29 @@ public class WorldCursorComponent : SyncScript
 			return;
 
 		if (this.Input.HasMouse)
-			this.Entity.Transform.Position = WorldCursorComponent.GetWorldPosition(this.Input.MousePosition, camera);
+			this.Entity.Transform.Position = CursorComponent.GetWorldPosition(this.Input.MousePosition, camera);
 
 		// TODO this must be refactored into an order system.
-		var characters = this.SceneSystem.GetAll(nameof(Character)).SelectMany(entity => entity.GetAll<CharacterComponent>()).ToArray();
+		var characters = this.SceneSystem.GetAll(nameof(Character))
+			.SelectMany(entity => entity.GetAll<CharacterComponent>())
+			.Where(character => character.IsSelected)
+			.ToArray();
+
 		var debugGrid = this.SceneSystem.GetAll(nameof(WorldGrid)).SelectMany(entity => entity.GetAll<GridComponent>()).FirstOrDefault();
 
 		if (this.Input.IsMouseButtonPressed(MouseButton.Left))
+			this.left = true;
+
+		if (this.Input.IsMouseButtonPressed(MouseButton.Right))
+			this.right = true;
+
+		if ((this.left || this.right) && this.Input.MouseDelta.Length() != 0)
+			this.left = this.right = false;
+
+		if (this.Input.IsMouseButtonReleased(MouseButton.Left) && this.left)
 		{
+			this.left = false;
+
 			foreach (var character in characters)
 			{
 				if (debugGrid == null)
@@ -33,15 +51,18 @@ public class WorldCursorComponent : SyncScript
 					character.Path.AddRange(debugGrid.FindPath(character.Entity.Transform.Position, this.Entity.Transform.Position));
 			}
 		}
-		else if (this.Input.IsMouseButtonPressed(MouseButton.Right) && debugGrid != null)
+		else if (this.Input.IsMouseButtonReleased(MouseButton.Right) && this.right && debugGrid != null)
+		{
+			this.right = false;
 			debugGrid.ToggleWalkable(this.Entity.Transform.Position);
+		}
 	}
 
-	public static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
+	private static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
 	{
 		var plane = new Plane(new(0, -2, 0), new Vector3(0, 1, 0));
 
-		WorldCursorComponent.ProjectMouse(mouse, camera).Intersects(ref plane, out Vector3 location);
+		CursorComponent.ProjectMouse(mouse, camera).Intersects(ref plane, out Vector3 location);
 
 		return location;
 	}

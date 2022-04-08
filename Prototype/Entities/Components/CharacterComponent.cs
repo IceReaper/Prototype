@@ -8,6 +8,7 @@ public class CharacterComponent : SyncScript
 	private const float Movespeed = 5f;
 
 	public readonly List<Vector3> Path = new();
+	public bool IsSelected;
 
 	public override void Update()
 	{
