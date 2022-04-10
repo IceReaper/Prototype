@@ -1,9 +1,10 @@
 ﻿namespace Prototype;
 
-using Entities;
-using Maps;
-using Maps.FileFormats;
 using Stride.Engine;
+using Systems.Entities;
+using Systems.Maps;
+using Systems.Maps.FileFormats;
+using Utils;
 
 public class PrototypeGame : Game
 {
@@ -23,7 +24,10 @@ public class PrototypeGame : Game
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);
 		UnitSelector.Create(this);
-		Character.Create(this).Transform.Position = new(119, 3, 210);
-		Character.Create(this).Transform.Position = new(122, 3, 210);
+
+		Character.Create(this).Transform.Position = new(119.5f, 2, 210.5f);
+		Character.Create(this).Transform.Position = new(122.5f, 2, 210.5f);
+		Character.Create(this).Transform.Position = new(123.5f, 2, 210.5f);
+		Character.Create(this).Transform.Position = new(124.5f, 2, 210.5f);
 	}
 }
