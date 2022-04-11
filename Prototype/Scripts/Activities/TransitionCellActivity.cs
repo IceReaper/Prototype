@@ -12,12 +12,16 @@ public class TransitionCellActivity : Activity
 {
 	private readonly Entity entity;
 	private readonly Vector3 target;
-	private Vector3? origin;
 
 	public TransitionCellActivity(Entity entity, Vector3 target)
 	{
 		this.entity = entity;
 		this.target = target;
+	}
+
+	protected override void Start()
+	{
+		this.entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>()?.ReserveCell(this.target, this.entity);
 	}
 
 	protected override void UpdateInner(GameTime updateTime)
@@ -31,22 +35,13 @@ public class TransitionCellActivity : Activity
 			return;
 		}
 
-		if (this.origin == null)
-		{
-			this.origin = this.entity.Transform.Position;
-			gridComponent.ReserveCell(this.target, this.entity);
-		}
-
-		var deltaTime = (float)gridComponent.Game.UpdateTime.Elapsed.TotalSeconds;
+		var deltaTime = (float)updateTime.Elapsed.TotalSeconds;
 		var distance = (this.target - this.entity.Transform.Position).Length();
 		var direction = Vector3.Normalize(this.target - this.entity.Transform.Position);
 
 		if (distance > 0)
 			this.entity.Transform.Position += direction * Math.Min(CharacterComponent.Movespeed * deltaTime, distance);
 		else
-		{
-			gridComponent.UnreserveCell(this.target, this.entity);
 			this.Complete();
-		}
 	}
 }

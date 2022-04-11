@@ -44,22 +44,16 @@ public class MoveActivity : Activity
 			return;
 		}
 
-		if (this.path.Count > 0 && !gridComponent.CanTransitionToCell(this.entity.Transform.Position, this.path[0]))
+		if (this.retryTime > 0)
 		{
-			this.retryTime = new Random().NextDouble() * MoveActivity.MaxUnstuckTime;
-			this.path.Clear();
+			this.retryTime -= Math.Min(updateTime.Elapsed.TotalSeconds, this.retryTime);
+
+			if (this.retryTime > 0)
+				return;
 		}
 
 		if (this.path.Count == 0)
 		{
-			if (this.retryTime > 0)
-			{
-				this.retryTime -= Math.Min(updateTime.Elapsed.TotalSeconds, this.retryTime);
-
-				if (this.retryTime > 0)
-					return;
-			}
-
 			this.path.AddRange(gridComponent.FindPath(this.entity.Transform.Position, this.target));
 
 			if (this.path.Count == 0)
@@ -76,6 +70,14 @@ public class MoveActivity : Activity
 			}
 
 			this.retryCount = 0;
+		}
+
+		if (!gridComponent.CanTransitionToCell(this.entity.Transform.Position, this.path[0]))
+		{
+			this.retryTime = new Random().NextDouble() * MoveActivity.MaxUnstuckTime;
+			this.path.Clear();
+
+			return;
 		}
 
 		var nextCell = this.path[0];

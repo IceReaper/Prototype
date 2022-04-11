@@ -19,7 +19,7 @@ public class PrototypeGame : Game
 		if (!File.Exists($"Assets/Maps/{mapName}.map") || true)
 			LegacyMapConverter.Import(this.GraphicsContext, $"Assets/Maps/{mapName}", 608);
 
-		WorldGrid.Create(this).Transform.Position = new(115, 2, 205);
+		WorldGrid.Create(this).Transform.Position = new(0, 2, 0);
 		MapLoader.Load(this, Map.Read(File.OpenRead($"Assets/Maps/{mapName}.map")));
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);

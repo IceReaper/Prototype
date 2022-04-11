@@ -12,14 +12,16 @@ public abstract class Activity
 		this.State = State.Completed;
 	}
 
-	public void Add(Activity activity)
+	protected void Add(Activity activity)
 	{
 		this.children.Add(activity);
 	}
 
 	public void Update(GameTime updateTime)
 	{
-		if (this.State == State.Queued)
+		var first = this.State == State.Queued;
+
+		if (first)
 			this.State = State.Started;
 
 		var child = this.children.FirstOrDefault();
@@ -32,7 +34,16 @@ public abstract class Activity
 				this.children.Remove(child);
 		}
 		else
+		{
+			if (first)
+				this.Start();
+
 			this.UpdateInner(updateTime);
+		}
+	}
+
+	protected virtual void Start()
+	{
 	}
 
 	protected virtual void UpdateInner(GameTime updateTime)

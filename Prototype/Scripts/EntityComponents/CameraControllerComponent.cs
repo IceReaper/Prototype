@@ -24,7 +24,7 @@ public class CameraControllerComponent : SyncScript
 
 	public override void Update()
 	{
-		if (!this.Game.IsActive)
+		if (!this.Game.Window.Focused)
 			return;
 
 		var deltaTime = (float)this.Game.UpdateTime.Elapsed.TotalSeconds;

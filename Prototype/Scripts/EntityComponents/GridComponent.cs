@@ -12,58 +12,62 @@ using Systems.Navigation;
 public class GridComponent : StartupScript
 {
 	private Grid? grid;
-	private Model[,] models = new Model[0, 0];
 
 	public override void Start()
 	{
+		this.grid = new(256, 256);
+
 		this.grid = new(20, 20);
-		this.models = new Model[this.grid.Width, this.grid.Height];
+		this.Entity.Transform.Position = new(115, 2, 205);
 
+		/*for (var x = 5; x <= 5; x++)
 		for (var y = 0; y <= 7; y++)
-		for (var x = 5; x <= 5; x++)
+			this.grid.GetCell(115 + x, 205 + y)?.SetWall(true);*/
+
+		var modelFree = new Model
 		{
-			var cell = this.grid.GetCell(x, y);
-
-			if (cell != null)
-				cell.IsWall = true;
-		}
-
-		var materialFree = Material.New(
-			this.GraphicsDevice,
-			new()
-			{
-				Attributes =
+			new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f).ToMeshDraw() },
+			Material.New(
+				this.GraphicsDevice,
+				new()
 				{
-					Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.White)), DiffuseModel = new MaterialDiffuseLambertModelFeature()
-				}
-			}
-		);
-
-		var materialBlocked = Material.New(
-			this.GraphicsDevice,
-			new()
-			{
-				Attributes =
-				{
-					Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.Red)), DiffuseModel = new MaterialDiffuseLambertModelFeature()
-				}
-			}
-		);
-
-		for (var x = 0; x < this.grid.Width; x++)
-		for (var y = 0; y < this.grid.Height; y++)
-		{
-			var debugcube = new Entity
-			{
-				new ModelComponent(
-					this.models[x, y] = new()
+					Attributes =
 					{
-						new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f, 8).ToMeshDraw() },
-						this.grid.GetCell(x, y)?.IsWall ?? false ? materialBlocked : materialFree
+						Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.White)),
+						DiffuseModel = new MaterialDiffuseLambertModelFeature()
 					}
-				)
-			};
+				}
+			)
+		};
 
+		var modelBlocked = new Model
+		{
+			new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f).ToMeshDraw() },
+			Material.New(
+				this.GraphicsDevice,
+				new()
+				{
+					Attributes =
+					{
+						Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.Red)),
+						DiffuseModel = new MaterialDiffuseLambertModelFeature()
+					}
+				}
+			)
+		};
+
+		for (var x = 0; x < 20; x++)
+		for (var y = 0; y < 20; y++)
+		{
+			var model = modelFree;
+
+			if (x == 5 && y is >= 0 and <= 7)
+			{
+				model = modelBlocked;
+				this.grid.GetCell(x, y)?.SetWall(true);
+			}
+
+			var debugcube = new Entity { new ModelComponent(model) };
 			debugcube.Transform.Position = new(x + .5f, 0, y + .5f);
 			this.Entity.AddChild(debugcube);
 		}
@@ -77,31 +81,31 @@ public class GridComponent : StartupScript
 		var (startX, startY) = this.GetPosition(start);
 		var (endX, endY) = this.GetPosition(end);
 
-		return PathFinder.CanTransitionToCell(this.grid, startX, startY, endX, endY);
+		return this.grid.CanTransition(startX, startY, endX, endY);
 	}
 
 	public void BlockCell(Vector3 target, Entity entity)
 	{
 		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.BlockedBy.Add(entity);
+		this.grid?.GetCell(x, y)?.Block(entity);
 	}
 
 	public void UnblockCell(Vector3 target, Entity entity)
 	{
 		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.BlockedBy.Remove(entity);
+		this.grid?.GetCell(x, y)?.Unblock(entity);
 	}
 
 	public void ReserveCell(Vector3 target, Entity entity)
 	{
 		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.ReservedBy.Add(entity);
+		this.grid?.GetCell(x, y)?.Reserve(entity);
 	}
 
 	public void UnreserveCell(Vector3 target, Entity entity)
 	{
 		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.ReservedBy.Remove(entity);
+		this.grid?.GetCell(x, y)?.Unreserve(entity);
 	}
 
 	public IEnumerable<Vector3> FindPath(Vector3 start, Vector3 end)
@@ -112,8 +116,7 @@ public class GridComponent : StartupScript
 		var (startX, startY) = this.GetPosition(start);
 		var (endX, endY) = this.GetPosition(end);
 
-		return PathFinder.FindPath(this.grid, startX, startY, endX, endY)
-			.Select(cell => new Vector3(cell.X + .5f, 0, cell.Y + .5f) + this.Entity.Transform.Position);
+		return this.grid.FindPath(startX, startY, endX, endY).Select(cell => new Vector3(cell.X + .5f, 0, cell.Y + .5f) + this.Entity.Transform.Position);
 	}
 
 	private (int X, int Y) GetPosition(Vector3 position)
