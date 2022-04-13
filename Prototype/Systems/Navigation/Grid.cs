@@ -106,7 +106,7 @@ public class Grid
 					openListStart.Add(neighbour);
 					visitedCells.Add(neighbour, info);
 				}
-				else if (visitedCells[neighbour].Next != null && visitedCells[neighbour].Previous == null)
+				else if ((visitedCells[neighbour].Next != null || neighbour == end) && visitedCells[neighbour].Previous == null)
 					info = visitedCells[neighbour];
 
 				if (info == null)
@@ -116,7 +116,7 @@ public class Grid
 				info.CostFromStart = costFromStart;
 				info.CostToEndEstimated = costToEndEstimated;
 
-				if (info.Next == null || info.CostFromStart + info.CostToEnd >= matchCost)
+				if ((info.Next == null && neighbour != end) || info.CostFromStart + info.CostToEnd >= matchCost)
 					continue;
 
 				matchCell = neighbour;
@@ -141,7 +141,7 @@ public class Grid
 					openListEnd.Add(neighbour);
 					visitedCells.Add(neighbour, info);
 				}
-				else if (visitedCells[neighbour].Previous != null && visitedCells[neighbour].Next == null)
+				else if ((visitedCells[neighbour].Previous != null || neighbour == start) && visitedCells[neighbour].Next == null)
 					info = visitedCells[neighbour];
 
 				if (info == null)
@@ -151,7 +151,7 @@ public class Grid
 				info.CostFromStartEstimated = costFromStartEstimated;
 				info.CostToEnd = costToEnd;
 
-				if (info.Previous == null || info.CostFromStart + info.CostToEnd >= matchCost)
+				if ((info.Previous == null && neighbour != start) || info.CostFromStart + info.CostToEnd >= matchCost)
 					continue;
 
 				matchCell = neighbour;
