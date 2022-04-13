@@ -22,8 +22,6 @@ public class Cell
 		this.grid = grid;
 		this.X = x;
 		this.Y = y;
-
-		this.UpdateNeighbours();
 	}
 
 	public void SetWall(bool isWall)
@@ -74,7 +72,7 @@ public class Cell
 		return this.neighbours.ContainsKey(target) && !target.reservedBy.Any();
 	}
 
-	private void UpdateNeighbours()
+	public void UpdateNeighbours()
 	{
 		for (var y = -1; y <= 1; y++)
 		for (var x = -1; x <= 1; x++)
@@ -109,9 +107,6 @@ public class Cell
 	{
 		var xDistance = Math.Abs(this.X - target.X);
 		var yDistance = Math.Abs(this.Y - target.Y);
-
-		if (xDistance > 1 || yDistance > 1)
-			return false;
 
 		if (this.IsBlocked() || target.IsBlocked())
 			return false;

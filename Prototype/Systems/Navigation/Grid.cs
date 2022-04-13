@@ -4,21 +4,22 @@ public class Grid
 {
 	private const float MoveStraightCost = 1;
 	private const float MoveDiagonalCost = 1.4f;
-	private const float ReservedCost = 5;
+	private const float ReservedCost = 3;
 
-	private struct CellInfo
+	private class CellInfo
 	{
-		public float CostRequired;
-		public float CostRemaining;
-		public Cell? CameFrom;
-		public bool FromStart;
+		public Cell? Previous;
+		public Cell? Next;
+		public float CostFromStart;
+		public float CostToEnd;
+		public float CostFromStartEstimated;
+		public float CostToEndEstimated;
 	}
 
 	private readonly int width;
 	private readonly int height;
 
 	private readonly Cell[,] cells;
-	private readonly Dictionary<Cell, CellInfo> cellInfos;
 
 	public Grid(int width, int height)
 	{
@@ -26,11 +27,14 @@ public class Grid
 		this.height = height;
 
 		this.cells = new Cell[width, height];
-		this.cellInfos = new(this.width * this.height);
 
-		for (var x = 0; x < this.cells.GetLength(0); x++)
-		for (var y = 0; y < this.cells.GetLength(1); y++)
+		for (var x = 0; x < this.width; x++)
+		for (var y = 0; y < this.height; y++)
 			this.cells[x, y] = new(this, x, y);
+
+		for (var x = 0; x < this.width; x++)
+		for (var y = 0; y < this.height; y++)
+			this.cells[x, y].UpdateNeighbours();
 	}
 
 	public Cell? GetCell(int x, int y)
@@ -60,82 +64,116 @@ public class Grid
 		if (start == null || end == null || start == end)
 			return Array.Empty<Cell>();
 
-		this.cellInfos.Clear();
-		this.cellInfos.Add(start, new() { CostRemaining = Grid.CalculateCost(start, end), FromStart = true });
-		this.cellInfos.Add(end, new() { CostRemaining = Grid.CalculateCost(end, start), FromStart = false });
+		var visitedCells = new Dictionary<Cell, CellInfo>(this.width * this.height)
+		{
+			{ start, new() { CostToEndEstimated = Grid.CalculateCost(start, end) } },
+			{ end, new() { CostFromStartEstimated = Grid.CalculateCost(end, start) } }
+		};
 
 		var openListStart = new List<Cell> { start };
 		var openListEnd = new List<Cell> { end };
-		IEnumerable<Cell>? path = null;
 
-		while (openListStart.Count > 0 && openListEnd.Count > 0)
+		Cell? matchCell = null;
+		var matchCost = float.MaxValue;
+
+		while (true)
 		{
-			path ??= this.ProcessNode(openListStart, true, end);
-			path ??= this.ProcessNode(openListEnd, false, start);
+			var bestFromStart = openListStart.MinBy(cell => visitedCells[cell].CostToEndEstimated);
+			var bestFromEnd = openListEnd.MinBy(cell => visitedCells[cell].CostFromStartEstimated);
 
-			if (path != null)
-				return path;
-		}
+			if (bestFromStart == null || bestFromEnd == null)
+				break;
 
-		return Array.Empty<Cell>();
-	}
+			openListStart.Remove(bestFromStart);
+			openListEnd.Remove(bestFromEnd);
 
-	private IEnumerable<Cell>? ProcessNode(ICollection<Cell> open, bool fromStart, Cell end)
-	{
-		var current = open.MinBy(cell => this.cellInfos[cell].CostRemaining);
-
-		if (current == null)
-			return null;
-
-		open.Remove(current);
-		
-		// TODO when we have an connection, stop doing end pathing. And from now on, including this iteration:
-		// TODO if a cell connects throw away all end-paths and open start cells with higher value than this one.
-		// TODO only add start cells which can theoretically outpass the current highest value
-		// TODO when we are out of open nodes, we precisely know which connection was the shortest.
-		foreach (var (neighbour, cost) in current.Neighbours)
-		{
-			if (!this.cellInfos.ContainsKey(neighbour))
+			foreach (var neighbour in bestFromStart.Neighbours.Keys.Where(cell => cell != start))
 			{
-				open.Add(neighbour);
+				CellInfo? info = null;
 
-				this.cellInfos.Add(
-					neighbour,
-					new()
-					{
-						CostRequired = this.cellInfos[current].CostRequired + cost + (neighbour.IsReserved ? Grid.ReservedCost : 0),
-						CostRemaining = Grid.CalculateCost(neighbour, end),
-						CameFrom = current,
-						FromStart = fromStart
-					}
-				);
+				var costFromStart = visitedCells[bestFromStart].CostFromStart
+					+ bestFromStart.Neighbours[neighbour]
+					+ (neighbour.IsReserved ? Grid.ReservedCost : 0);
+
+				var costToEndEstimated = Grid.CalculateCost(neighbour, end);
+
+				if (matchCell != null && costFromStart + costToEndEstimated > matchCost)
+					continue;
+
+				if (!visitedCells.ContainsKey(neighbour))
+				{
+					info = new();
+					openListStart.Add(neighbour);
+					visitedCells.Add(neighbour, info);
+				}
+				else if (visitedCells[neighbour].Next != null && visitedCells[neighbour].Previous == null)
+					info = visitedCells[neighbour];
+
+				if (info == null)
+					continue;
+
+				info.Previous = bestFromStart;
+				info.CostFromStart = costFromStart;
+				info.CostToEndEstimated = costToEndEstimated;
+
+				if (info.Next == null || info.CostFromStart + info.CostToEnd >= matchCost)
+					continue;
+
+				matchCell = neighbour;
+				matchCost = info.CostFromStart + info.CostToEnd;
+
+				openListStart.RemoveAll(cell => visitedCells[cell].CostFromStart + visitedCells[cell].CostToEndEstimated >= matchCost);
+				openListEnd.RemoveAll(cell => visitedCells[cell].CostFromStartEstimated + visitedCells[cell].CostToEnd >= matchCost);
 			}
-			else if (this.cellInfos[neighbour].FromStart != fromStart)
+
+			foreach (var neighbour in bestFromEnd.Neighbours.Keys.Where(cell => cell != end))
 			{
-				var pathA = Grid.CalculatePath(current, this.cellInfos.ToDictionary(e => e.Key, e => e.Value.CameFrom));
-				var pathB = Grid.CalculatePath(neighbour, this.cellInfos.ToDictionary(e => e.Key, e => e.Value.CameFrom));
+				CellInfo? info = null;
+				var costFromStartEstimated = Grid.CalculateCost(start, neighbour);
+				var costToEnd = visitedCells[bestFromEnd].CostToEnd + neighbour.Neighbours[bestFromEnd] + (bestFromEnd.IsReserved ? Grid.ReservedCost : 0);
 
-				return fromStart ? pathA.Skip(1).Concat(pathB.Reverse()) : pathB.Skip(1).Concat(pathA.Reverse());
+				if (matchCell != null && costFromStartEstimated + costToEnd > matchCost)
+					continue;
+
+				if (!visitedCells.ContainsKey(neighbour))
+				{
+					info = new();
+					openListEnd.Add(neighbour);
+					visitedCells.Add(neighbour, info);
+				}
+				else if (visitedCells[neighbour].Previous != null && visitedCells[neighbour].Next == null)
+					info = visitedCells[neighbour];
+
+				if (info == null)
+					continue;
+
+				info.Next = bestFromEnd;
+				info.CostFromStartEstimated = costFromStartEstimated;
+				info.CostToEnd = costToEnd;
+
+				if (info.Previous == null || info.CostFromStart + info.CostToEnd >= matchCost)
+					continue;
+
+				matchCell = neighbour;
+				matchCost = info.CostFromStart + info.CostToEnd;
+
+				openListStart.RemoveAll(cell => visitedCells[cell].CostFromStart + visitedCells[cell].CostToEndEstimated >= matchCost);
+				openListEnd.RemoveAll(cell => visitedCells[cell].CostFromStartEstimated + visitedCells[cell].CostToEnd >= matchCost);
 			}
 		}
 
-		return null;
-	}
+		if (matchCell == null)
+			return Array.Empty<Cell>();
 
-	private static IEnumerable<Cell> CalculatePath(Cell end, IReadOnlyDictionary<Cell, Cell?> cameFrom)
-	{
-		var path = new List<Cell>();
-		var current = end;
+		var path = new List<Cell> { matchCell };
 
-		while (current != null)
-		{
-			path.Add(current);
-			current = cameFrom[current];
-		}
+		for (var previous = visitedCells[matchCell].Previous; previous != null; previous = visitedCells[previous].Previous)
+			path.Insert(0, previous);
 
-		path.Reverse();
+		for (var next = visitedCells[matchCell].Next; next != null; next = visitedCells[next].Next)
+			path.Add(next);
 
-		return path;
+		return path.Skip(1);
 	}
 
 	public static float CalculateCost(Cell from, Cell to)
