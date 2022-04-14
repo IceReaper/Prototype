@@ -1,5 +1,7 @@
 namespace Prototype.Systems.Navigation;
 
+using Stride.Engine;
+
 public class Grid
 {
 	private const float MoveStraightCost = 1;
@@ -45,15 +47,18 @@ public class Grid
 		return null;
 	}
 
-	public bool CanTransition(int startX, int startY, int endX, int endY)
+	public bool CanTransition(Entity entity, int startX, int startY, int endX, int endY)
 	{
 		var start = this.GetCell(startX, startY);
 		var end = this.GetCell(endX, endY);
 
-		if (start == null || end == null || start == end)
+		if (start == end)
+			return true;
+
+		if (start == null || end == null)
 			return false;
 
-		return start.CanTransition(end);
+		return start.CanTransition(entity, end);
 	}
 
 	public IEnumerable<Cell> FindPath(int startX, int startY, int endX, int endY)

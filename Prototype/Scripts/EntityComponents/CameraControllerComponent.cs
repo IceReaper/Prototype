@@ -20,7 +20,14 @@ public class CameraControllerComponent : SyncScript
 	private const int MousePanFactor = 100;
 	private const int MouseRotateFactor = 100;
 
+	private CameraComponent? cameraComponent;
+
 	private float rotation;
+
+	public override void Start()
+	{
+		this.cameraComponent = this.Entity.Components.FirstOrDefault<CameraComponent>();
+	}
 
 	public override void Update()
 	{
@@ -167,13 +174,11 @@ public class CameraControllerComponent : SyncScript
 		this.Entity.Transform.Position += Vector3.Transform(finalMovement, Quaternion.RotationYawPitchRoll(this.rotation, 0, 0));
 		this.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.rotation, MathHelper.ToRadians(CameraControllerComponent.Angle), 0);
 
-		var cameraComponent = this.Entity.Components.FirstOrDefault<CameraComponent>();
-
-		if (cameraComponent == null)
+		if (this.cameraComponent == null)
 			return;
 
-		cameraComponent.VerticalFieldOfView = Math.Clamp(
-			cameraComponent.VerticalFieldOfView - zoom,
+		this.cameraComponent.VerticalFieldOfView = Math.Clamp(
+			this.cameraComponent.VerticalFieldOfView - zoom,
 			CameraControllerComponent.ZoomMin,
 			CameraControllerComponent.ZoomMax
 		);

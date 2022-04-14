@@ -8,29 +8,35 @@ using Systems.Entities;
 
 public class SelectorComponent : SyncScript
 {
+	private Entity? entity;
+	private ModelComponent? modelComponent;
+
 	private Vector3 mouseStart;
 	private Vector3 mouseEnd;
 
+	public override void Start()
+	{
+		this.entity = this.Entity.Scene.Entities.FirstOrDefault(nameof(Cursor));
+		this.modelComponent = this.Entity.Components.FirstOrDefault<ModelComponent>();
+	}
+
 	public override void Update()
 	{
-		var entity = this.Entity.Scene.Entities.FirstOrDefault(nameof(Cursor));
-		var modelComponent = this.Entity.Components.FirstOrDefault<ModelComponent>();
-
-		if (modelComponent == null || entity == null)
+		if (this.modelComponent == null || this.entity == null)
 			return;
 
 		if (this.Input.IsMouseButtonDown(MouseButton.Left))
 		{
-			if (!modelComponent.Enabled && this.Input.MouseDelta.Length() != 0)
+			if (!this.modelComponent.Enabled && this.Input.MouseDelta.Length() != 0)
 			{
-				modelComponent.Enabled = true;
-				this.mouseStart = entity.Transform.Position;
+				this.modelComponent.Enabled = true;
+				this.mouseStart = this.entity.Transform.Position;
 			}
 
-			if (!modelComponent.Enabled)
+			if (!this.modelComponent.Enabled)
 				return;
 
-			this.mouseEnd = entity.Transform.Position;
+			this.mouseEnd = this.entity.Transform.Position;
 
 			var distance = this.mouseEnd - this.mouseStart;
 
@@ -38,9 +44,9 @@ public class SelectorComponent : SyncScript
 			this.Entity.Transform.Scale.X = Math.Max(Math.Abs(distance.X), .1f);
 			this.Entity.Transform.Scale.Z = Math.Max(Math.Abs(distance.Z), .1f);
 		}
-		else if (modelComponent.Enabled)
+		else if (this.modelComponent.Enabled)
 		{
-			modelComponent.Enabled = false;
+			this.modelComponent.Enabled = false;
 
 			foreach (var character in this.Entity.Scene.Entities.OfType(nameof(Character)).SelectMany(entity => entity.Components.OfType<CharacterComponent>()))
 			{

@@ -2,86 +2,37 @@ namespace Prototype.Scripts.EntityComponents;
 
 using Stride.Core.Mathematics;
 using Stride.Engine;
-using Stride.Extensions;
-using Stride.Graphics.GeometricPrimitives;
-using Stride.Rendering;
-using Stride.Rendering.Materials;
-using Stride.Rendering.Materials.ComputeColors;
 using Systems.Navigation;
 
 public class GridComponent : StartupScript
 {
+	private const int MaxPathRange = 32;
+	
 	private Grid? grid;
 
 	public override void Start()
 	{
 		this.grid = new(256, 256);
 
-		this.grid = new(20, 20);
-		this.Entity.Transform.Position = new(115, 2, 205);
-
-		/*for (var x = 5; x <= 5; x++)
-		for (var y = 0; y <= 7; y++)
-			this.grid.GetCell(115 + x, 205 + y)?.SetWall(true);*/
-
-		var modelFree = new Model
-		{
-			new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f).ToMeshDraw() },
-			Material.New(
-				this.GraphicsDevice,
-				new()
-				{
-					Attributes =
-					{
-						Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.White)),
-						DiffuseModel = new MaterialDiffuseLambertModelFeature()
-					}
-				}
-			)
-		};
-
-		var modelBlocked = new Model
-		{
-			new Mesh { Draw = GeometricPrimitive.Cube.New(this.GraphicsDevice, .5f).ToMeshDraw() },
-			Material.New(
-				this.GraphicsDevice,
-				new()
-				{
-					Attributes =
-					{
-						Diffuse = new MaterialDiffuseMapFeature(new ComputeColor(Color.Red)),
-						DiffuseModel = new MaterialDiffuseLambertModelFeature()
-					}
-				}
-			)
-		};
-
-		for (var x = 0; x < 20; x++)
-		for (var y = 0; y < 20; y++)
-		{
-			var model = modelFree;
-
-			if (x == 5 && y is >= 0 and <= 7)
-			{
-				model = modelBlocked;
-				this.grid.GetCell(x, y)?.SetWall(true);
-			}
-
-			var debugcube = new Entity { new ModelComponent(model) };
-			debugcube.Transform.Position = new(x + .5f, 0, y + .5f);
-			this.Entity.AddChild(debugcube);
-		}
+		for (var x = 0; x < 5; x++)
+		for (var y = 0; y < 7; y++)
+			this.grid.GetCell(115 + x, 205 + y)?.SetWall(true);
 	}
 
-	public bool CanTransitionToCell(Vector3 start, Vector3 end)
+	public (int X, int Y) GetCell(Vector3 position)
+	{
+		return this.GetPosition(position);
+	}
+
+	public bool CanTransitionToCell(Vector3 target, Entity entity)
 	{
 		if (this.grid == null)
 			return false;
 
-		var (startX, startY) = this.GetPosition(start);
-		var (endX, endY) = this.GetPosition(end);
+		var (startX, startY) = this.GetPosition(entity.Transform.Position);
+		var (endX, endY) = this.GetPosition(target);
 
-		return this.grid.CanTransition(startX, startY, endX, endY);
+		return this.grid.CanTransition(entity, startX, startY, endX, endY);
 	}
 
 	public void BlockCell(Vector3 target, Entity entity)
@@ -115,6 +66,11 @@ public class GridComponent : StartupScript
 
 		var (startX, startY) = this.GetPosition(start);
 		var (endX, endY) = this.GetPosition(end);
+
+		// TODO this does not work correctly yet, as if the calculated max cell is unpathable, the entities will not get a path.
+		// TODO we might instead want to make paths calculate over several ticks, with a maximum number of checks per tick.
+		//endX = Math.Clamp(endX, startX - GridComponent.MaxPathRange, startX + GridComponent.MaxPathRange);
+		//endY = Math.Clamp(endY, startY - GridComponent.MaxPathRange, startY + GridComponent.MaxPathRange);
 
 		return this.grid.FindPath(startX, startY, endX, endY).Select(cell => new Vector3(cell.X + .5f, 0, cell.Y + .5f) + this.Entity.Transform.Position);
 	}

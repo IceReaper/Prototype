@@ -7,25 +7,28 @@ using Systems.Entities;
 
 public class BlockCellComponent : SyncScript
 {
-	private Vector3 blockedPosition = new(-1);
-	private int blockedX = -1;
-	private int blockedY = -1;
+	private GridComponent? gridComponent;
+	private Vector3 blockPosition;
+	private (int X, int Y) blockCell = (-1, -1);
+
+	public override void Start()
+	{
+		this.gridComponent = this.Entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
+	}
 
 	public override void Update()
 	{
-		var currentX = (int)this.Entity.Transform.Position.X;
-		var currentY = (int)this.Entity.Transform.Position.Z;
-
-		if (this.blockedX == currentX && this.blockedY == currentY)
+		if (this.gridComponent == null)
 			return;
 
-		var grid = this.Entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
+		var blockCell = this.gridComponent.GetCell(this.Entity.Transform.Position);
 
-		grid?.UnblockCell(this.blockedPosition, this.Entity);
-		grid?.BlockCell(this.Entity.Transform.Position, this.Entity);
+		if (this.blockCell.X == blockCell.X && this.blockCell.Y == blockCell.Y)
+			return;
 
-		this.blockedPosition = this.Entity.Transform.Position;
-		this.blockedX = currentX;
-		this.blockedY = currentY;
+		this.gridComponent.UnblockCell(this.blockPosition, this.Entity);
+		this.blockPosition = this.Entity.Transform.Position;
+		this.gridComponent.BlockCell(this.blockPosition, this.Entity);
+		this.blockCell = blockCell;
 	}
 }

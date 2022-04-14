@@ -10,82 +10,99 @@ using Systems.Entities;
 
 public class MoveActivity : Activity
 {
-	private const int RetryCount = 5;
-	private const double RetryAfter = 1;
-	private const double MaxUnstuckTime = .25;
+	private const int UnstuckTries = 20;
+	private const double UnstuckDelay = .25;
 
 	private readonly Entity entity;
 	private readonly Vector3 target;
+	private readonly GridComponent? gridComponent;
+	private readonly ReserveCellComponent? reserveCellComponent;
+
 	private readonly List<Vector3> path = new();
-	private double retryTime;
-	private int retryCount;
+	private int unstuckTry;
+	private double unstuckDelay;
+	private bool reserved;
 
 	public MoveActivity(Entity entity, Vector3 target)
 	{
 		this.entity = entity;
 		this.target = target;
+
+		this.gridComponent = this.entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
+		this.reserveCellComponent = this.entity.Components.FirstOrDefault<ReserveCellComponent>();
 	}
 
 	protected override void UpdateInner(GameTime updateTime)
 	{
-		if (this.State == State.Canceled)
+		if (this.gridComponent == null)
 		{
 			this.Complete();
 
 			return;
 		}
 
-		var gridComponent = this.entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
-
-		if (gridComponent == null)
+		if (this.unstuckDelay > 0)
 		{
-			this.Complete();
+			this.unstuckDelay -= Math.Min(updateTime.Elapsed.TotalSeconds, this.unstuckDelay);
 
-			return;
-		}
-
-		if (this.retryTime > 0)
-		{
-			this.retryTime -= Math.Min(updateTime.Elapsed.TotalSeconds, this.retryTime);
-
-			if (this.retryTime > 0)
+			if (this.unstuckDelay > 0)
 				return;
 		}
 
 		if (this.path.Count == 0)
 		{
-			this.path.AddRange(gridComponent.FindPath(this.entity.Transform.Position, this.target));
+			if (this.State != State.Canceled)
+				this.path.AddRange(this.gridComponent.FindPath(this.entity.Transform.Position, this.target));
 
 			if (this.path.Count == 0)
+				this.Complete();
+		}
+
+		var remainingDistance = (float)(CharacterComponent.Movespeed * updateTime.Elapsed.TotalSeconds);
+
+		while (remainingDistance > 0 && this.path.Count > 0)
+		{
+			var target = this.path[0];
+
+			if (!this.reserved)
 			{
-				if (this.retryCount == MoveActivity.RetryCount)
-					this.Complete();
+				if (this.gridComponent.CanTransitionToCell(target, this.entity))
+				{
+					this.gridComponent.ReserveCell(target, this.entity);
+					this.reserved = true;
+					this.unstuckTry = 0;
+				}
 				else
 				{
-					this.retryTime = MoveActivity.RetryAfter;
-					this.retryCount++;
-				}
+					this.path.Clear();
 
-				return;
+					this.unstuckTry++;
+					this.unstuckDelay = MoveActivity.UnstuckDelay;
+
+					if (this.unstuckTry == MoveActivity.UnstuckTries)
+						this.Complete();
+
+					return;
+				}
 			}
 
-			this.retryCount = 0;
+			var distanceToTarget = (target - this.entity.Transform.Position).Length();
+			var direction = Vector3.Normalize(target - this.entity.Transform.Position);
+			var moveDistance = remainingDistance;
+
+			if (remainingDistance >= distanceToTarget)
+			{
+				moveDistance = distanceToTarget;
+				this.path.RemoveAt(0);
+				this.reserved = false;
+
+				if (this.State == State.Canceled)
+					this.path.Clear();
+			}
+
+			this.entity.Transform.Position += direction * moveDistance;
+			remainingDistance -= moveDistance;
+			this.reserveCellComponent?.Update();
 		}
-
-		if (!gridComponent.CanTransitionToCell(this.entity.Transform.Position, this.path[0]))
-		{
-			this.retryTime = new Random().NextDouble() * MoveActivity.MaxUnstuckTime;
-			this.path.Clear();
-
-			return;
-		}
-
-		var nextCell = this.path[0];
-		this.path.RemoveAt(0);
-
-		var transitionActivity = new TransitionCellActivity(this.entity, nextCell);
-		this.Add(transitionActivity);
-
-		transitionActivity.Update(updateTime);
 	}
 }

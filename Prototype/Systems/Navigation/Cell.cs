@@ -67,9 +67,9 @@ public class Cell
 		this.reservedBy.Remove(entity);
 	}
 
-	public bool CanTransition(Cell target)
+	public bool CanTransition(Entity entity, Cell target)
 	{
-		return this.neighbours.ContainsKey(target) && !target.reservedBy.Any();
+		return this.neighbours.ContainsKey(target) && target.reservedBy.All(reserver => reserver == entity);
 	}
 
 	public void UpdateNeighbours()

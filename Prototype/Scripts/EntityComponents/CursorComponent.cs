@@ -10,17 +10,22 @@ using Systems.Entities;
 
 public class CursorComponent : SyncScript
 {
+	private CameraComponent? camera;
+
 	private bool isClick;
+
+	public override void Start()
+	{
+		this.camera = this.Entity.Scene.Entities.FirstOrDefault(nameof(Camera))?.Components.FirstOrDefault<CameraComponent>();
+	}
 
 	public override void Update()
 	{
-		var camera = this.Entity.Scene.Entities.FirstOrDefault(nameof(Camera))?.Components.FirstOrDefault<CameraComponent>();
-
-		if (camera == null)
+		if (this.camera == null)
 			return;
 
 		if (this.Input.HasMouse)
-			this.Entity.Transform.Position = CursorComponent.GetWorldPosition(this.Input.MousePosition, camera);
+			this.Entity.Transform.Position = CursorComponent.GetWorldPosition(this.Input.MousePosition, this.camera);
 
 		if (this.Input.IsMouseButtonPressed(MouseButton.Right))
 			this.isClick = true;

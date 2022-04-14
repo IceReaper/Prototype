@@ -25,7 +25,7 @@ public class ActivitySystemComponent : SyncScript
 			this.queue.Remove(activity);
 	}
 
-	public void Cancel()
+	public override void Cancel()
 	{
 		foreach (var activity in this.queue.ToArray())
 		{
