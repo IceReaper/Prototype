@@ -1,15 +1,14 @@
 ﻿namespace Prototype.Scripts.EntityComponents;
 
 using Extensions;
-using Stride.Core.Mathematics;
 using Stride.Engine;
 using Systems.Entities;
+using Systems.Navigation;
 
 public class ReserveCellComponent : SyncScript
 {
 	private GridComponent? gridComponent;
-	private Vector3 reservePosition;
-	private (int X, int Y) reserveCell = (-1, -1);
+	private Cell? reserveCell;
 
 	public override void Start()
 	{
@@ -21,14 +20,15 @@ public class ReserveCellComponent : SyncScript
 		if (this.gridComponent == null)
 			return;
 
-		var reserveCell = this.gridComponent.GetCell(this.Entity.Transform.Position);
+		var reserveCell = this.gridComponent.GetCellContaining(this.Entity.Transform.Position);
 
-		if (this.reserveCell.X == reserveCell.X && this.reserveCell.Y == reserveCell.Y)
+		if (this.reserveCell != reserveCell)
 			return;
 
-		this.gridComponent.UnreserveCell(this.reservePosition, this.Entity);
-		this.reservePosition = this.Entity.Transform.Position;
-		this.gridComponent.ReserveCell(this.reservePosition, this.Entity);
+		this.reserveCell?.Reservers.Remove(this.Entity);
 		this.reserveCell = reserveCell;
+
+		if (this.reserveCell != null && !this.reserveCell.Reservers.Contains(this.Entity))
+			this.reserveCell.Reservers.Add(this.Entity);
 	}
 }

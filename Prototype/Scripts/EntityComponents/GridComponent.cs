@@ -6,77 +6,29 @@ using Systems.Navigation;
 
 public class GridComponent : StartupScript
 {
-	private const int MaxPathRange = 32;
-	
-	private Grid? grid;
+	public Grid? Grid;
 
-	public override void Start()
+	public Cell? GetCellContaining(Vector3 position)
 	{
-		this.grid = new(256, 256);
+		var (x, y, z) = ((int)position.X, (int)position.Y, (int)position.Z);
 
-		for (var x = 0; x < 5; x++)
-		for (var y = 0; y < 7; y++)
-			this.grid.GetCell(115 + x, 205 + y)?.SetWall(true);
+		if (this.Grid != null && x >= 0 && y >= 0 && z >= 0 && x < this.Grid.X && y < this.Grid.Y && z < this.Grid.Z)
+			return this.Grid.Cells[x, y, z];
+
+		return null;
 	}
 
-	public (int X, int Y) GetCell(Vector3 position)
+	public IEnumerable<Cell> FindPath(Vector3 from, Vector3 to)
 	{
-		return this.GetPosition(position);
-	}
+		if (this.Grid == null)
+			return Array.Empty<Cell>();
 
-	public bool CanTransitionToCell(Vector3 target, Entity entity)
-	{
-		if (this.grid == null)
-			return false;
+		if (from.X >= 0 && from.Y >= 0 && from.Z >= 0 && from.X < this.Grid.X && from.Y < this.Grid.Y && from.Z < this.Grid.Z)
+			return Array.Empty<Cell>();
 
-		var (startX, startY) = this.GetPosition(entity.Transform.Position);
-		var (endX, endY) = this.GetPosition(target);
+		if (to.X >= 0 && to.Y >= 0 && to.Z >= 0 && to.X < this.Grid.X && to.Y < this.Grid.Y && to.Z < this.Grid.Z)
+			return Array.Empty<Cell>();
 
-		return this.grid.CanTransition(entity, startX, startY, endX, endY);
-	}
-
-	public void BlockCell(Vector3 target, Entity entity)
-	{
-		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.Block(entity);
-	}
-
-	public void UnblockCell(Vector3 target, Entity entity)
-	{
-		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.Unblock(entity);
-	}
-
-	public void ReserveCell(Vector3 target, Entity entity)
-	{
-		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.Reserve(entity);
-	}
-
-	public void UnreserveCell(Vector3 target, Entity entity)
-	{
-		var (x, y) = this.GetPosition(target);
-		this.grid?.GetCell(x, y)?.Unreserve(entity);
-	}
-
-	public IEnumerable<Vector3> FindPath(Vector3 start, Vector3 end)
-	{
-		if (this.grid == null)
-			return Array.Empty<Vector3>();
-
-		var (startX, startY) = this.GetPosition(start);
-		var (endX, endY) = this.GetPosition(end);
-
-		// TODO this does not work correctly yet, as if the calculated max cell is unpathable, the entities will not get a path.
-		// TODO we might instead want to make paths calculate over several ticks, with a maximum number of checks per tick.
-		//endX = Math.Clamp(endX, startX - GridComponent.MaxPathRange, startX + GridComponent.MaxPathRange);
-		//endY = Math.Clamp(endY, startY - GridComponent.MaxPathRange, startY + GridComponent.MaxPathRange);
-
-		return this.grid.FindPath(startX, startY, endX, endY).Select(cell => new Vector3(cell.X + .5f, 0, cell.Y + .5f) + this.Entity.Transform.Position);
-	}
-
-	private (int X, int Y) GetPosition(Vector3 position)
-	{
-		return ((int)(position.X - this.Entity.Transform.Position.X), (int)(position.Z - this.Entity.Transform.Position.Z));
+		return Pathfinder.FindPath(this.Grid, (int)from.X, (int)from.Y, (int)from.Z, (int)to.X, (int)to.Y, (int)to.Z);
 	}
 }

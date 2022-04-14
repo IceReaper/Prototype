@@ -1,7 +1,9 @@
 ﻿namespace Prototype.Systems.Maps;
 
 using Entities;
+using Extensions;
 using FileFormats;
+using Scripts.EntityComponents;
 using Stride.Engine;
 using Stride.Games;
 using Stride.Graphics;
@@ -32,6 +34,8 @@ public static class MapLoader
 
 		foreach (var light in map.Lights)
 			MapLoader.LoadLight(game, light);
+
+		MapLoader.LoadGrid(game.SceneSystem.SceneInstance.RootScene, map);
 	}
 
 	private static MaterialInstance LoadBlocksMaterial(IGame game, Map map)
@@ -128,5 +132,15 @@ public static class MapLoader
 			lightPoint.Color = new ColorRgbProvider(light.Color);
 			lightPoint.Radius = light.Radius;
 		}
+	}
+
+	private static void LoadGrid(Scene scene, Map map)
+	{
+		var gridComponent = scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
+
+		if (gridComponent == null)
+			return;
+
+		gridComponent.Grid = GridBuilder.BuildGrid(map);
 	}
 }

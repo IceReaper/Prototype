@@ -7,6 +7,7 @@ using Stride.Engine;
 using Stride.Games;
 using Systems.Activities;
 using Systems.Entities;
+using Systems.Navigation;
 
 public class MoveActivity : Activity
 {
@@ -18,10 +19,9 @@ public class MoveActivity : Activity
 	private readonly GridComponent? gridComponent;
 	private readonly ReserveCellComponent? reserveCellComponent;
 
-	private readonly List<Vector3> path = new();
+	private readonly List<Cell> path = new();
 	private int unstuckTry;
 	private double unstuckDelay;
-	private bool reserved;
 
 	public MoveActivity(Entity entity, Vector3 target)
 	{
@@ -63,13 +63,13 @@ public class MoveActivity : Activity
 		while (remainingDistance > 0 && this.path.Count > 0)
 		{
 			var target = this.path[0];
+			var targetPosition = new Vector3(target.X + target.Y + target.Z);
 
-			if (!this.reserved)
+			if (!target.Reservers.Contains(this.entity))
 			{
-				if (this.gridComponent.CanTransitionToCell(target, this.entity))
+				if (target.Reservers.Count == 0)
 				{
-					this.gridComponent.ReserveCell(target, this.entity);
-					this.reserved = true;
+					target.Reservers.Add(this.entity);
 					this.unstuckTry = 0;
 				}
 				else
@@ -86,15 +86,14 @@ public class MoveActivity : Activity
 				}
 			}
 
-			var distanceToTarget = (target - this.entity.Transform.Position).Length();
-			var direction = Vector3.Normalize(target - this.entity.Transform.Position);
+			var distanceToTarget = (targetPosition - this.entity.Transform.Position).Length();
+			var direction = Vector3.Normalize(targetPosition - this.entity.Transform.Position);
 			var moveDistance = remainingDistance;
 
 			if (remainingDistance >= distanceToTarget)
 			{
 				moveDistance = distanceToTarget;
 				this.path.RemoveAt(0);
-				this.reserved = false;
 
 				if (this.State == State.Canceled)
 					this.path.Clear();
