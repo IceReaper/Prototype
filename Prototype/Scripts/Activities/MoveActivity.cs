@@ -1,15 +1,15 @@
 ﻿namespace Prototype.Scripts.Activities;
 
+using Entities;
 using EntityComponents;
 using Extensions;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Games;
 using Systems.Activities;
-using Systems.Entities;
 using Systems.Navigation;
 
-public class MoveActivity : Activity
+public sealed class MoveActivity : Activity
 {
 	private const int UnstuckTries = 20;
 	private const double UnstuckDelay = .25;
@@ -58,18 +58,18 @@ public class MoveActivity : Activity
 				this.Complete();
 		}
 
-		var remainingDistance = (float)(CharacterComponent.Movespeed * updateTime.Elapsed.TotalSeconds);
+		var remainingDistance = (float)(CharacterComponent.MoveSpeed * updateTime.Elapsed.TotalSeconds);
 
 		while (remainingDistance > 0 && this.path.Count > 0)
 		{
-			var target = this.path[0];
-			var targetPosition = new Vector3(target.X + target.Y + target.Z);
+			var cell = this.path[0];
+			var cellPosition = new Vector3(cell.X, cell.Y, cell.Z);
 
-			if (!target.Reservers.Contains(this.entity))
+			if (!cell.Occupiers.Contains(this.entity))
 			{
-				if (target.Reservers.Count == 0)
+				if (cell.Occupiers.Count == 0)
 				{
-					target.Reservers.Add(this.entity);
+					cell.Occupiers.Add(this.entity);
 					this.unstuckTry = 0;
 				}
 				else
@@ -86,8 +86,8 @@ public class MoveActivity : Activity
 				}
 			}
 
-			var distanceToTarget = (targetPosition - this.entity.Transform.Position).Length();
-			var direction = Vector3.Normalize(targetPosition - this.entity.Transform.Position);
+			var distanceToTarget = (cellPosition - this.entity.Transform.Position).Length();
+			var direction = Vector3.Normalize(cellPosition - this.entity.Transform.Position);
 			var moveDistance = remainingDistance;
 
 			if (remainingDistance >= distanceToTarget)

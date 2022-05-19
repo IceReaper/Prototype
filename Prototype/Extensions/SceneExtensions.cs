@@ -17,6 +17,6 @@ public static class SceneExtensions
 	public static T? FirstOrDefault<T>(this IEnumerable<EntityComponent> components)
 		where T : EntityComponent
 	{
-		return components.FirstOrDefault(component => component is T) as T;
+		return components.FirstOrDefault(static component => component is T) as T;
 	}
 }

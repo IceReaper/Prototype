@@ -1,6 +1,6 @@
-﻿namespace Prototype.Systems.Entities;
+﻿namespace Prototype.Entities;
 
-using Scripts.EntityComponents;
+using Prototype.Scripts.EntityComponents;
 using Stride.Engine;
 using Stride.Extensions;
 using Stride.Graphics.GeometricPrimitives;

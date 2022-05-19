@@ -1,4 +1,4 @@
-﻿namespace Prototype.Systems.Entities;
+﻿namespace Prototype.Entities;
 
 using Stride.Core.Mathematics;
 using Stride.Engine;

@@ -3,7 +3,7 @@
 using Stride.Engine;
 using Systems.Activities;
 
-public class ActivitySystemComponent : SyncScript
+public sealed class ActivitySystemComponent : SyncScript
 {
 	private readonly List<Activity> queue = new();
 
@@ -16,12 +16,9 @@ public class ActivitySystemComponent : SyncScript
 	{
 		var activity = this.queue.FirstOrDefault();
 
-		if (activity == null)
-			return;
+		activity?.Update(this.Game.UpdateTime);
 
-		activity.Update(this.Game.UpdateTime);
-
-		if (activity.State == State.Completed)
+		if (activity?.State == State.Completed)
 			this.queue.Remove(activity);
 	}
 

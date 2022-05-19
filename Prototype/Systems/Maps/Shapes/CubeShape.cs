@@ -3,7 +3,7 @@
 using Stride.Core.Mathematics;
 using Stride.Graphics;
 
-public class CubeShape : Shape
+public sealed class CubeShape : Shape
 {
 	public CubeShape(Vector3 min, Vector3 max)
 	{

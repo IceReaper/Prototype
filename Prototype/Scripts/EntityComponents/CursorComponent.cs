@@ -1,14 +1,14 @@
 namespace Prototype.Scripts.EntityComponents;
 
 using Activities;
+using Entities;
 using Extensions;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Input;
 using System.Runtime.InteropServices;
-using Systems.Entities;
 
-public class CursorComponent : SyncScript
+public sealed class CursorComponent : SyncScript
 {
 	private CameraComponent? camera;
 

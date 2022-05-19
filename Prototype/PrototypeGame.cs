@@ -1,12 +1,12 @@
 ﻿namespace Prototype;
 
+using Entities;
 using Stride.Engine;
-using Systems.Entities;
 using Systems.Maps;
 using Systems.Maps.FileFormats;
 using Utils;
 
-public class PrototypeGame : Game
+public sealed class PrototypeGame : Game
 {
 	protected override void BeginRun()
 	{
@@ -14,13 +14,11 @@ public class PrototypeGame : Game
 		this.SceneSystem.GraphicsCompositor = GraphicsCompositorBuilder.Create();
 		this.SceneSystem.SceneInstance = new(this.Services, new());
 
-		const string mapName = "bil";
-
-		if (!File.Exists($"Assets/Maps/{mapName}.map") || true)
-			LegacyMapConverter.Import(this.GraphicsContext, $"Assets/Maps/{mapName}", 608);
+		if (!File.Exists("Assets/Maps/bil.map") || true)
+			LegacyMapConverter.Import(this.GraphicsContext, "Assets/Maps/bil", 608);
 
 		WorldGrid.Create(this);
-		MapLoader.Load(this, Map.Read(File.OpenRead($"Assets/Maps/{mapName}.map")));
+		MapLoader.Load(this, Map.Read(File.OpenRead("Assets/Maps/bil.map")));
 		Camera.Create(this).Transform.Position = new(117, 16, 215);
 		Cursor.Create(this);
 		UnitSelector.Create(this);

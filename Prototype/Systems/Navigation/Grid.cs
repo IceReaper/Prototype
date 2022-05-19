@@ -1,6 +1,6 @@
 namespace Prototype.Systems.Navigation;
 
-public class Grid
+public sealed class Grid
 {
 	public readonly int X;
 	public readonly int Y;

@@ -1,10 +1,10 @@
-﻿namespace Prototype.Systems.Entities;
+﻿namespace Prototype.Entities;
 
+using Prototype.Utils;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Rendering.Colors;
 using Stride.Rendering.Lights;
-using Utils;
 
 public static class Sun
 {

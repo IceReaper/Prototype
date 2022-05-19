@@ -38,7 +38,7 @@ public struct VertexPositionNormalTextureDepth : IEquatable<VertexPositionNormal
 		return obj is VertexPositionNormalTextureDepth other && this.Equals(other);
 	}
 
-	public override int GetHashCode()
+	public readonly override int GetHashCode()
 	{
 		return HashCode.Combine(this.Position, this.Normal, this.TextureCoordinate, this.DepthOffset);
 	}
@@ -64,7 +64,7 @@ public struct VertexPositionNormalTextureDepth : IEquatable<VertexPositionNormal
 		return !left.Equals(right);
 	}
 
-	public override string ToString()
+	public readonly override string ToString()
 	{
 		return $"Position: {this.Position}, Normal: {this.Normal}, TextureCoordinate: {this.TextureCoordinate}, DepthOffset: {this.DepthOffset}";
 	}

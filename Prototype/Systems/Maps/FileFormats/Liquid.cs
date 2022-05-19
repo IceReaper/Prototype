@@ -3,7 +3,7 @@
 using Extensions;
 using Stride.Core.Mathematics;
 
-public class Liquid
+public sealed class Liquid
 {
 	public byte ShapeType;
 	public Color Color;

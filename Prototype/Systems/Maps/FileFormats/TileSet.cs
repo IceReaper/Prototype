@@ -1,6 +1,6 @@
 ﻿namespace Prototype.Systems.Maps.FileFormats;
 
-public class TileSet
+public sealed class TileSet
 {
 	public readonly List<string> Tiles = new();
 

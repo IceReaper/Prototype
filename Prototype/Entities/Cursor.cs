@@ -1,11 +1,11 @@
-﻿namespace Prototype.Systems.Entities;
+﻿namespace Prototype.Entities;
 
-using Scripts.EntityComponents;
+using Prototype.Scripts.EntityComponents;
+using Prototype.Utils;
 using Stride.Engine;
 using Stride.Extensions;
 using Stride.Graphics.GeometricPrimitives;
 using Stride.Rendering;
-using Utils;
 
 public static class Cursor
 {

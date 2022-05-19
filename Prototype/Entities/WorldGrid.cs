@@ -1,8 +1,8 @@
-namespace Prototype.Systems.Entities;
+namespace Prototype.Entities;
 
-using Scripts.EntityComponents;
+using Prototype.Scripts.EntityComponents;
+using Prototype.Utils;
 using Stride.Engine;
-using Utils;
 
 public static class WorldGrid
 {

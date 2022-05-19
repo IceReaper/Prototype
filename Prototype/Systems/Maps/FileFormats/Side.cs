@@ -1,10 +1,11 @@
 ﻿namespace Prototype.Systems.Maps.FileFormats;
 
-public class Side
+public sealed class Side
 {
 	public ushort Material;
 	public bool Flip;
 	public byte Rotation;
+	public bool IsHollow;
 
 	public static Side Read(Stream stream)
 	{

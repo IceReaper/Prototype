@@ -7,7 +7,7 @@ using Systems.Maps.FileFormats;
 
 public static class LegacyMapConverter
 {
-	private class TileUsage
+	private sealed class TileUsage
 	{
 		public readonly ushort Tile;
 		public readonly bool Transparent;
@@ -48,16 +48,16 @@ public static class LegacyMapConverter
 		var styReader = new BinaryReader(styStream);
 
 		if (gmpReader.ReadString(4) != LegacyMapConverter.GmpMagic)
-			throw new($"Map magic is not {LegacyMapConverter.GmpMagic}");
+			throw new InvalidOperationException($"Map magic is not {LegacyMapConverter.GmpMagic}");
 
 		if (styReader.ReadString(4) != LegacyMapConverter.StyMagic)
-			throw new($"SpriteBank magic is not {LegacyMapConverter.StyMagic}");
+			throw new InvalidOperationException($"SpriteBank magic is not {LegacyMapConverter.StyMagic}");
 
 		if (gmpReader.ReadUInt16() != LegacyMapConverter.GmpVersion)
-			throw new($"Map version is not {LegacyMapConverter.GmpVersion}");
+			throw new InvalidOperationException($"Map version is not {LegacyMapConverter.GmpVersion}");
 
 		if (styReader.ReadUInt16() != LegacyMapConverter.StyVersion)
-			throw new($"SpriteBank version is not {LegacyMapConverter.StyVersion}");
+			throw new InvalidOperationException($"SpriteBank version is not {LegacyMapConverter.StyVersion}");
 
 		var gmpChunks = new Dictionary<string, Stream>();
 		var styChunks = new Dictionary<string, Stream>();
@@ -69,19 +69,19 @@ public static class LegacyMapConverter
 			styChunks.Add(styReader.ReadString(4), new MemoryStream(styReader.ReadBytes(styReader.ReadInt32())));
 
 		if (!gmpChunks.TryGetValue(LegacyMapConverter.GeometryMagic, out var geometryStream))
-			throw new($"Map is missing {LegacyMapConverter.GeometryMagic} chunk");
+			throw new InvalidOperationException($"Map is missing {LegacyMapConverter.GeometryMagic} chunk");
 
 		if (!gmpChunks.TryGetValue(LegacyMapConverter.LightMagic, out var lightStream))
-			throw new($"Map is missing {LegacyMapConverter.LightMagic} chunk");
+			throw new InvalidOperationException($"Map is missing {LegacyMapConverter.LightMagic} chunk");
 
 		if (!styChunks.TryGetValue(LegacyMapConverter.PaletteMappingsMagic, out var paletteMappingsStream))
-			throw new($"SpriteBank is missing {LegacyMapConverter.PaletteMappingsMagic} chunk");
+			throw new InvalidOperationException($"SpriteBank is missing {LegacyMapConverter.PaletteMappingsMagic} chunk");
 
 		if (!styChunks.TryGetValue(LegacyMapConverter.PaletteCatalogMagic, out var paletteCatalogStream))
-			throw new($"SpriteBank is missing {LegacyMapConverter.PaletteCatalogMagic} chunk");
+			throw new InvalidOperationException($"SpriteBank is missing {LegacyMapConverter.PaletteCatalogMagic} chunk");
 
 		if (!styChunks.TryGetValue(LegacyMapConverter.TileCatalogMagic, out var tileCatalogStream))
-			throw new($"SpriteBank is missing {LegacyMapConverter.TileCatalogMagic} chunk");
+			throw new InvalidOperationException($"SpriteBank is missing {LegacyMapConverter.TileCatalogMagic} chunk");
 
 		var tileUsages = new List<TileUsage>();
 		using var mapStream = File.Open($"{path}.map", FileMode.Create);
@@ -379,7 +379,7 @@ public static class LegacyMapConverter
 		while (tileCatalogStream.Position < tileCatalogStream.Length)
 			tileCatalogs.Add(LegacyMapConverter.ReadTileCatalog(tileCatalogStream));
 
-		var tileCatalog = tileCatalogs.SelectMany(tileCatalog => tileCatalog).ToArray();
+		var tileCatalog = tileCatalogs.SelectMany(static tileCatalog => tileCatalog).ToArray();
 
 		for (var i = 0; i < tileUsages.Count; i++)
 		{

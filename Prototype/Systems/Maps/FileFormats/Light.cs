@@ -3,7 +3,7 @@
 using Extensions;
 using Stride.Core.Mathematics;
 
-public class Light
+public sealed class Light
 {
 	public Color Color;
 	public Vector3 Position;

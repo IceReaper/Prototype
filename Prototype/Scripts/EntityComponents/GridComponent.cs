@@ -4,7 +4,7 @@ using Stride.Core.Mathematics;
 using Stride.Engine;
 using Systems.Navigation;
 
-public class GridComponent : StartupScript
+public sealed class GridComponent : StartupScript
 {
 	public Grid? Grid;
 

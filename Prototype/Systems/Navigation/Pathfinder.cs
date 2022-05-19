@@ -2,7 +2,7 @@
 
 public static class Pathfinder
 {
-	private class CellInfo
+	private sealed class CellInfo
 	{
 		public Cell? Previous;
 		public Cell? Next;
@@ -12,10 +12,10 @@ public static class Pathfinder
 		public float CostToEndEstimated;
 	}
 
-	public const float MoveStraightCost = 1;
-	public const float MoveDiagonalCost = 1.4f;
-	public const float MoveUpCost = 1.4f;
-	public const float ReservedCost = 3;
+	private const float MoveStraightCost = 1;
+	private const float MoveDiagonalCost = 1.4f;
+	private const float MoveUpCost = 1.4f;
+	private const float OccupiedCost = 3;
 
 	public static IEnumerable<Cell> FindPath(Grid grid, int startX, int startY, int startZ, int endX, int endY, int endZ)
 	{
@@ -54,7 +54,7 @@ public static class Pathfinder
 
 				var costFromStart = visitedCells[bestFromStart].CostFromStart
 					+ bestFromStart.Neighbours[neighbour]
-					+ (neighbour.Reservers.Any() ? Pathfinder.ReservedCost : 0);
+					+ (neighbour.Occupiers.Any() ? Pathfinder.OccupiedCost : 0);
 
 				var costToEndEstimated = Pathfinder.CalculateCost(neighbour, end);
 
@@ -95,7 +95,7 @@ public static class Pathfinder
 
 				var costToEnd = visitedCells[bestFromEnd].CostToEnd
 					+ neighbour.Neighbours[bestFromEnd]
-					+ (bestFromEnd.Reservers.Any() ? Pathfinder.ReservedCost : 0);
+					+ (bestFromEnd.Occupiers.Any() ? Pathfinder.OccupiedCost : 0);
 
 				if (matchCell != null && costFromStartEstimated + costToEnd > matchCost)
 					continue;

@@ -3,7 +3,7 @@
 using Stride.Core.Mathematics;
 using Stride.Graphics;
 
-public class SlopeEdgeShapeOuter : Shape
+public sealed class SlopeEdgeShapeOuter : Shape
 {
 	private static readonly VertexPositionNormalTexture[] ForwardLeft =
 	{
@@ -49,7 +49,7 @@ public class SlopeEdgeShapeOuter : Shape
 			0 => (Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Backward[1], Geometry.Backward[2], Geometry.Backward[3] },
 				Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Down[0], Geometry.Down[1], Geometry.Down[3] }, SlopeEdgeShapeOuter.ForwardLeft,
 				new[] { Geometry.Right[0], Geometry.Right[2], Geometry.Right[3] }),
-			_ => throw new()
+			_ => throw new InvalidOperationException()
 		};
 	}
 }

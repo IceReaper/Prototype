@@ -1,13 +1,13 @@
 ﻿namespace Prototype.Scripts.EntityComponents;
 
+using Entities;
 using Extensions;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Input;
-using Systems.Entities;
 using Vortice.Mathematics;
 
-public class CameraControllerComponent : SyncScript
+public sealed class CameraControllerComponent : SyncScript
 {
 	private const int Angle = -60;
 	private const int ZoomMin = 10;
@@ -22,7 +22,7 @@ public class CameraControllerComponent : SyncScript
 
 	private CameraComponent? cameraComponent;
 
-	private float rotation;
+	private float lastRotation;
 
 	public override void Start()
 	{
@@ -161,18 +161,18 @@ public class CameraControllerComponent : SyncScript
 
 		this.Entity.Transform.Position -= Vector3.Transform(
 			new(0, 0, CameraControllerComponent.RotateDistance),
-			Quaternion.RotationYawPitchRoll(this.rotation, 0, 0)
+			Quaternion.RotationYawPitchRoll(this.lastRotation, 0, 0)
 		);
 
-		this.rotation -= finalRotation;
+		this.lastRotation -= finalRotation;
 
 		this.Entity.Transform.Position += Vector3.Transform(
 			new(0, 0, CameraControllerComponent.RotateDistance),
-			Quaternion.RotationYawPitchRoll(this.rotation, 0, 0)
+			Quaternion.RotationYawPitchRoll(this.lastRotation, 0, 0)
 		);
 
-		this.Entity.Transform.Position += Vector3.Transform(finalMovement, Quaternion.RotationYawPitchRoll(this.rotation, 0, 0));
-		this.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.rotation, MathHelper.ToRadians(CameraControllerComponent.Angle), 0);
+		this.Entity.Transform.Position += Vector3.Transform(finalMovement, Quaternion.RotationYawPitchRoll(this.lastRotation, 0, 0));
+		this.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.lastRotation, MathHelper.ToRadians(CameraControllerComponent.Angle), 0);
 
 		if (this.cameraComponent == null)
 			return;

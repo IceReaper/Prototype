@@ -2,7 +2,7 @@
 
 using Utils;
 
-public class Cell
+public sealed class Cell
 {
 	public Block? Block;
 	public Liquid? Liquid;

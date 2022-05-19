@@ -1,12 +1,12 @@
 namespace Prototype.Scripts.EntityComponents;
 
+using Entities;
 using Extensions;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Input;
-using Systems.Entities;
 
-public class SelectorComponent : SyncScript
+public sealed class SelectorComponent : SyncScript
 {
 	private Entity? entity;
 	private ModelComponent? modelComponent;
@@ -48,7 +48,8 @@ public class SelectorComponent : SyncScript
 		{
 			this.modelComponent.Enabled = false;
 
-			foreach (var character in this.Entity.Scene.Entities.OfType(nameof(Character)).SelectMany(entity => entity.Components.OfType<CharacterComponent>()))
+			foreach (var character in this.Entity.Scene.Entities.OfType(nameof(Character))
+				         .SelectMany(static entity => entity.Components.OfType<CharacterComponent>()))
 			{
 				character.IsSelected = this.mouseStart.X < character.Entity.Transform.Position.X
 					&& character.Entity.Transform.Position.X < this.mouseEnd.X

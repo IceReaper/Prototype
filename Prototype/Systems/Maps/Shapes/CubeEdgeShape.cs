@@ -3,7 +3,7 @@
 using Stride.Core.Mathematics;
 using Stride.Graphics;
 
-public class CubeEdgeShape : Shape
+public sealed class CubeEdgeShape : Shape
 {
 	private static readonly VertexPositionNormalTexture[] BackwardRight =
 	{
@@ -49,7 +49,7 @@ public class CubeEdgeShape : Shape
 				new[] { Geometry.Down[0], Geometry.Down[2], Geometry.Down[3] }, Geometry.Left, CubeEdgeShape.ForwardRight),
 			0 => (Array.Empty<VertexPositionNormalTexture>(), Geometry.Backward, new[] { Geometry.Up[1], Geometry.Up[2], Geometry.Up[3] },
 				new[] { Geometry.Down[0], Geometry.Down[1], Geometry.Down[3] }, CubeEdgeShape.ForwardLeft, Geometry.Right),
-			_ => throw new()
+			_ => throw new InvalidOperationException()
 		};
 	}
 }

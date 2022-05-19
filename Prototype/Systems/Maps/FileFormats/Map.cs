@@ -3,7 +3,7 @@
 using Extensions;
 using Stride.Core.Mathematics;
 
-public class Map
+public sealed class Map
 {
 	public Color SunAmbient;
 	public Color SunDirectional;

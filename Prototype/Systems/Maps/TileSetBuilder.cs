@@ -14,7 +14,7 @@ public static class TileSetBuilder
 	public static Texture Build(GraphicsContext graphicsContext, Map map)
 	{
 		var textures = map.TileSet.Tiles.Select(
-				texture =>
+				static texture =>
 				{
 					using var stream = File.OpenRead($"Assets/Textures/{texture}_diffuse.png");
 
@@ -25,8 +25,8 @@ public static class TileSetBuilder
 
 		var tilesPerDirection = TileSetBuilder.TilesPerDirection(map);
 
-		var tileWidth = MathUtil.NextPowerOfTwo(textures.Max(texture => texture.Description.Width));
-		var tileHeight = MathUtil.NextPowerOfTwo(textures.Max(texture => texture.Description.Width));
+		var tileWidth = MathUtil.NextPowerOfTwo(textures.Max(static texture => texture.Description.Width));
+		var tileHeight = MathUtil.NextPowerOfTwo(textures.Max(static texture => texture.Description.Width));
 
 		var textureWidth = tileWidth * tilesPerDirection;
 		var textureHeight = tileHeight * tilesPerDirection;

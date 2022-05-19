@@ -6,11 +6,10 @@
 // TODO under windows-x64 the data dir is used, so we clear all generated stuff.
 File.WriteAllText("data/db/index", "");
 
-foreach (var directory in Directory.GetDirectories("data/db").Select(e => e.Replace("\\", "/")))
-{
-	if (directory is not ("data/db/tmp" or "data/db/bundles"))
-		Directory.Delete(directory, true);
-}
+foreach (var directory in Directory.GetDirectories("data/db")
+	         .Select(static e => e.Replace("\\", "/"))
+	         .Where(static directory => directory is not ("data/db/tmp" or "data/db/bundles")))
+	Directory.Delete(directory, true);
 
 // TODO under osx-arm64 however the runtime generated db files are in another location
 if (Directory.Exists("local"))

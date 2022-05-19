@@ -1,14 +1,14 @@
 ﻿namespace Prototype.Scripts.EntityComponents;
 
+using Entities;
 using Extensions;
 using Stride.Engine;
-using Systems.Entities;
 using Systems.Navigation;
 
-public class ReserveCellComponent : SyncScript
+public sealed class ReserveCellComponent : SyncScript
 {
 	private GridComponent? gridComponent;
-	private Cell? reserveCell;
+	private Cell? occupyCell;
 
 	public override void Start()
 	{
@@ -20,15 +20,15 @@ public class ReserveCellComponent : SyncScript
 		if (this.gridComponent == null)
 			return;
 
-		var reserveCell = this.gridComponent.GetCellContaining(this.Entity.Transform.Position);
+		var cell = this.gridComponent.GetCellContaining(this.Entity.Transform.Position);
 
-		if (this.reserveCell != reserveCell)
+		if (this.occupyCell != cell)
 			return;
 
-		this.reserveCell?.Reservers.Remove(this.Entity);
-		this.reserveCell = reserveCell;
+		this.occupyCell?.Occupiers.Remove(this.Entity);
+		this.occupyCell = cell;
 
-		if (this.reserveCell != null && !this.reserveCell.Reservers.Contains(this.Entity))
-			this.reserveCell.Reservers.Add(this.Entity);
+		if (this.occupyCell?.Occupiers.Contains(this.Entity) == false)
+			this.occupyCell.Occupiers.Add(this.Entity);
 	}
 }

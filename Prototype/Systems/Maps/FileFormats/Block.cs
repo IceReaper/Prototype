@@ -2,7 +2,7 @@
 
 using Utils;
 
-public class Block
+public sealed class Block
 {
 	public byte ShapeType;
 

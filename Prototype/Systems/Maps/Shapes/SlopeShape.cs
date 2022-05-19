@@ -2,7 +2,7 @@
 
 using Stride.Graphics;
 
-public class SlopeShape : Shape
+public sealed class SlopeShape : Shape
 {
 	public SlopeShape(int rotation, int steps, int current)
 	{
@@ -16,7 +16,7 @@ public class SlopeShape : Shape
 			2 => (high, low, high, low),
 			1 => (high, high, low, low),
 			0 => (low, low, high, high),
-			_ => throw new()
+			_ => throw new InvalidOperationException()
 		};
 
 		this.Forward = SlopeShape.Modify(Geometry.Forward, new[] { br, bl, 0, 0 }, true);
