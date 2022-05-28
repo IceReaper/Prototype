@@ -69,8 +69,21 @@ public static class GridBuilder
 				if (nextX < 0 || nextX >= grid.X || nextZ < 0 || nextZ >= grid.Z || (nextX == x && nextZ == z))
 					continue;
 
-				var nextCell = map.Cells[nextX, y, nextZ];
-				var nextCellBelow = y == 0 ? null : map.Cells[x, y - 1, z];
+				var nextY = y;
+
+				if ((currentCellBelow?.Block?.ShapeType is 3 or 9 && nextZ < z)
+				    || (currentCellBelow?.Block?.ShapeType is 5 or 17 && nextX > x)
+				    || (currentCellBelow?.Block?.ShapeType is 1 or 25 && nextZ > z)
+				    || (currentCellBelow?.Block?.ShapeType is 7 or 33 && nextX < x))
+				{
+					nextY -= 1;
+
+					if (nextY == 0)
+						continue;
+				}
+
+				var nextCell = map.Cells[nextX, nextY, nextZ];
+				var nextCellBelow = nextY == 0 ? null : map.Cells[nextX, nextY - 1, nextZ];
 
 				var nextCellIsBlocked = GridBuilder.CellIsBlocked(nextCell);
 				var nextCellHasFloor = GridBuilder.CellHasFloor(nextCell, nextCellBelow);
@@ -81,7 +94,7 @@ public static class GridBuilder
 				// TODO check walls!
 
 				var a = grid.Cells[x, y, z];
-				var b = grid.Cells[nextX, y, nextZ];
+				var b = grid.Cells[nextX, nextY, nextZ];
 
 				if (a.Neighbours.ContainsKey(b))
 					continue;

@@ -13,9 +13,9 @@ public static class Pathfinder
 	}
 
 	private const float MoveStraightCost = 1;
-	private const float MoveDiagonalCost = 1.4f;
-	private const float MoveUpCost = 1.4f;
-	private const float OccupiedCost = 3;
+	private const float MoveDiagonalCost = 1.6f;
+	private const float MoveUpCost = 1.6f;
+	private const float OccupiedCost = 4;
 
 	public static IEnumerable<Cell> FindPath(Grid grid, int startX, int startY, int startZ, int endX, int endY, int endZ)
 	{
@@ -147,8 +147,8 @@ public static class Pathfinder
 		var yDistance = Math.Abs(from.Y - to.Y);
 		var zDistance = Math.Abs(from.Z - to.Z);
 
-		return Pathfinder.MoveDiagonalCost * Math.Min(xDistance, yDistance)
-			+ Pathfinder.MoveStraightCost * Math.Abs(xDistance - yDistance)
-			+ Pathfinder.MoveUpCost * zDistance;
+		return Pathfinder.MoveDiagonalCost * Math.Min(xDistance, zDistance)
+			+ Pathfinder.MoveStraightCost * Math.Abs(xDistance - zDistance)
+			+ Pathfinder.MoveUpCost * yDistance;
 	}
 }

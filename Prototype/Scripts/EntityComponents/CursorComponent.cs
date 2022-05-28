@@ -13,6 +13,7 @@ public sealed class CursorComponent : SyncScript
 	private CameraComponent? camera;
 
 	private bool isClick;
+	private int planeHeight;
 
 	public override void Start()
 	{
@@ -24,8 +25,14 @@ public sealed class CursorComponent : SyncScript
 		if (this.camera == null)
 			return;
 
+		if (this.Input.IsKeyPressed(Keys.OemPeriod))
+			this.planeHeight -= 1;
+
+		if (this.Input.IsKeyPressed(Keys.OemComma))
+			this.planeHeight += 1;
+
 		if (this.Input.HasMouse)
-			this.Entity.Transform.Position = CursorComponent.GetWorldPosition(this.Input.MousePosition, this.camera);
+			this.Entity.Transform.Position = this.GetWorldPosition(this.Input.MousePosition, this.camera);
 
 		if (this.Input.IsMouseButtonPressed(MouseButton.Right))
 			this.isClick = true;
@@ -57,9 +64,9 @@ public sealed class CursorComponent : SyncScript
 		}
 	}
 
-	private static Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
+	private Vector3 GetWorldPosition(Vector2 mouse, CameraComponent camera)
 	{
-		var plane = new Plane(new(0, -2, 0), new Vector3(0, 1, 0));
+		var plane = new Plane(new(0, this.planeHeight, 0), new Vector3(0, 1, 0));
 
 		CursorComponent.ProjectMouse(mouse, camera).Intersects(ref plane, out Vector3 location);
 
