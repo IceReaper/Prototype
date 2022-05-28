@@ -6,44 +6,27 @@ using Cell = FileFormats.Cell;
 
 public static class GridBuilder
 {
-	private static readonly List<(bool CanWalkOnTop, float WalkHeight)> WalkInfo = new();
+	private static readonly List<float> WalkHeights = new();
 
 	static GridBuilder()
 	{
-		GridBuilder.WalkInfo.Add((true, 1));
-
 		for (var direction = 0; direction < 4; direction++)
 		{
-			GridBuilder.WalkInfo.Add((true, .25f));
-			GridBuilder.WalkInfo.Add((true, .75f));
+			GridBuilder.WalkHeights.Add(.25f);
+			GridBuilder.WalkHeights.Add(.75f);
 		}
 
 		for (var direction = 0; direction < 4; direction++)
 		{
-			GridBuilder.WalkInfo.Add((true, .0625f));
-			GridBuilder.WalkInfo.Add((true, .1875f));
-			GridBuilder.WalkInfo.Add((true, .3125f));
-			GridBuilder.WalkInfo.Add((true, .4375f));
-			GridBuilder.WalkInfo.Add((true, .5625f));
-			GridBuilder.WalkInfo.Add((true, .6875f));
-			GridBuilder.WalkInfo.Add((true, .8125f));
-			GridBuilder.WalkInfo.Add((true, .9375f));
+			GridBuilder.WalkHeights.Add(.0625f);
+			GridBuilder.WalkHeights.Add(.1875f);
+			GridBuilder.WalkHeights.Add(.3125f);
+			GridBuilder.WalkHeights.Add(.4375f);
+			GridBuilder.WalkHeights.Add(.5625f);
+			GridBuilder.WalkHeights.Add(.6875f);
+			GridBuilder.WalkHeights.Add(.8125f);
+			GridBuilder.WalkHeights.Add(.9375f);
 		}
-
-		for (var direction = 0; direction < 4; direction++)
-			GridBuilder.WalkInfo.Add((true, .5f));
-
-		for (var direction = 0; direction < 4; direction++)
-			GridBuilder.WalkInfo.Add((false, 1));
-
-		for (var direction = 0; direction < 4; direction++)
-			GridBuilder.WalkInfo.Add((true, .5f));
-
-		for (var i = 0; i < 9; i++)
-			GridBuilder.WalkInfo.Add((false, 1));
-
-		for (var direction = 0; direction < 4; direction++)
-			GridBuilder.WalkInfo.Add((true, .5f));
 	}
 
 	public static Grid BuildGrid(Map map)
@@ -63,6 +46,9 @@ public static class GridBuilder
 			if (cellIsBlocked || !cellHasFloor)
 				continue;
 
+			if (currentCellBelow?.Block?.ShapeType is >= 1 and <= 40)
+				grid.Cells[x, y, z].Y -= 1 - GridBuilder.WalkHeights[currentCellBelow.Block.ShapeType - 1];
+
 			for (var nextX = x - 1; nextX <= x + 1; nextX++)
 			for (var nextZ = z - 1; nextZ <= z + 1; nextZ++)
 			{
@@ -71,9 +57,9 @@ public static class GridBuilder
 
 				var nextY = y;
 
-				if ((currentCellBelow?.Block?.ShapeType is 3 or 9 && nextZ < z)
-				    || (currentCellBelow?.Block?.ShapeType is 5 or 17 && nextX > x)
-				    || (currentCellBelow?.Block?.ShapeType is 1 or 25 && nextZ > z)
+				if ((currentCellBelow?.Block?.ShapeType is 1 or 9 && nextZ > z)
+				    || (currentCellBelow?.Block?.ShapeType is 3 or 17 && nextZ < z)
+				    || (currentCellBelow?.Block?.ShapeType is 5 or 25 && nextX > x)
 				    || (currentCellBelow?.Block?.ShapeType is 7 or 33 && nextX < x))
 				{
 					nextY -= 1;

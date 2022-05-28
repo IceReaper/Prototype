@@ -52,7 +52,7 @@ public sealed class MoveActivity : Activity
 		if (this.path.Count == 0)
 		{
 			if (this.State != State.Canceled)
-				this.path.AddRange(this.gridComponent.FindPath(this.entity.Transform.Position, this.target));
+				this.path.AddRange(this.gridComponent.FindPath(OccupyCellComponent.GetGridPosition(this.entity.Transform.Position), this.target));
 
 			if (this.path.Count == 0)
 				this.Complete();
@@ -63,7 +63,7 @@ public sealed class MoveActivity : Activity
 		while (remainingDistance > 0 && this.path.Count > 0)
 		{
 			var cell = this.path[0];
-			var cellPosition = new Vector3(cell.X + .5f, cell.Y + .5f, cell.Z + .5f);
+			var cellPosition = new Vector3(cell.X + .5f, cell.Y, cell.Z + .5f);
 
 			if (!cell.Occupiers.Contains(this.entity))
 			{

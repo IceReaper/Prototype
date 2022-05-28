@@ -5,7 +5,7 @@ using Stride.Engine;
 public sealed class Cell
 {
 	public readonly int X;
-	public readonly int Y;
+	public float Y;
 	public readonly int Z;
 
 	public readonly Dictionary<Cell, float> Neighbours = new();
