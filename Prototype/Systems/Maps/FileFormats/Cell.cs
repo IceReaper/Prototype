@@ -15,10 +15,10 @@ public sealed class Cell
 
 		var mask = reader.ReadByte();
 
-		if (MaskUtils.ReadBool(mask, 0))
+		if (MaskUtils.Read(mask, 0))
 			cell.Block = Block.Read(stream);
 
-		if (MaskUtils.ReadBool(mask, 1))
+		if (MaskUtils.Read(mask, 1))
 			cell.Liquid = Liquid.Read(stream);
 
 		return cell;
@@ -29,8 +29,8 @@ public sealed class Cell
 		var writer = new BinaryWriter(stream);
 
 		byte mask = 0;
-		MaskUtils.WriteNotNull(ref mask, 0, cell.Block);
-		MaskUtils.WriteNotNull(ref mask, 1, cell.Liquid);
+		MaskUtils.Write(ref mask, 0, cell.Block != null);
+		MaskUtils.Write(ref mask, 1, cell.Liquid != null);
 		writer.Write(mask);
 
 		if (cell.Block != null)

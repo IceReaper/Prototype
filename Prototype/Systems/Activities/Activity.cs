@@ -61,16 +61,31 @@ public abstract class Activity
 				this.children.Remove(child);
 		}
 
-		if (this.State == State.Started)
+		switch (this.State)
 		{
-			this.State = State.Canceled;
-			this.CancelInner();
+			case State.Queued:
+				if (this.children.Any())
+					this.Complete();
+
+				break;
+
+			case State.Started:
+				this.State = State.Canceled;
+				this.CancelInner();
+
+				break;
+
+			case State.Canceled:
+			case State.Completed:
+				break;
+
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
-		else
-			this.Complete();
 	}
 
 	protected virtual void CancelInner()
 	{
+		this.Complete();
 	}
 }

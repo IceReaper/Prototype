@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <OutputType>exe</OutputType>
@@ -16,8 +16,23 @@
         <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
         <PackageReference Include="Stride.Core.Assets.CompilerApp" Version="4.1.0.1" />
         <PackageReference Include="Stride.Engine" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Navigation" Version="4.1.0.1" />
         <PackageReference Include="Stride.Particles" Version="4.1.0.1" />
         <PackageReference Include="Stride.UI" Version="4.1.0.1" />
+
+        <!--<PackageReference Include="Stride.Assets.Models" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Physics" Version="4.1.0.1" />
+        <PackageReference Include="Stride.SpriteStudio.Offline" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Assets" Version="4.1.0.1" />
+        <PackageReference Include="Stride.SpriteStudio.Runtime" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Core.Assets" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Navigation" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Core.ProjectTemplating" Version="4.1.0.1" />
+        <PackageReference Include="Stride.TextureConverter" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Video" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Core.Packages" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Core.BuildEngine.Common" Version="4.1.0.1" />
+        <PackageReference Include="Stride.Core.Design" Version="4.1.0.1" />-->
     </ItemGroup>
 
 </Project>

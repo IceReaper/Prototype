@@ -1,11 +1,59 @@
 ﻿namespace Prototype.Systems.Maps;
 
+using DepthRendering;
 using FileFormats;
-using Rendering.Depth;
 using Stride.Graphics;
 
 public abstract class Shape
 {
+	protected static readonly VertexPositionNormalTexture[] FullRight =
+	{
+		new(new(1, 1, 1), new(1, 0, 0), new(0, 0)),
+		new(new(1, 1, 0), new(1, 0, 0), new(1, 0)),
+		new(new(1, 0, 0), new(1, 0, 0), new(1, 1)),
+		new(new(1, 0, 1), new(1, 0, 0), new(0, 1))
+	};
+
+	protected static readonly VertexPositionNormalTexture[] FullLeft =
+	{
+		new(new(0, 1, 0), new(-1, 0, 0), new(0, 0)),
+		new(new(0, 1, 1), new(-1, 0, 0), new(1, 0)),
+		new(new(0, 0, 1), new(-1, 0, 0), new(1, 1)),
+		new(new(0, 0, 0), new(-1, 0, 0), new(0, 1))
+	};
+
+	protected static readonly VertexPositionNormalTexture[] FullUp =
+	{
+		new(new(0, 1, 0), new(0, 1, 0), new(0, 0)),
+		new(new(1, 1, 0), new(0, 1, 0), new(1, 0)),
+		new(new(1, 1, 1), new(0, 1, 0), new(1, 1)),
+		new(new(0, 1, 1), new(0, 1, 0), new(0, 1))
+	};
+
+	protected static readonly VertexPositionNormalTexture[] FullDown =
+	{
+		new(new(1, 0, 1), new(0, -1, 0), new(1, 1)),
+		new(new(1, 0, 0), new(0, -1, 0), new(1, 0)),
+		new(new(0, 0, 0), new(0, -1, 0), new(0, 0)),
+		new(new(0, 0, 1), new(0, -1, 0), new(0, 1))
+	};
+
+	protected static readonly VertexPositionNormalTexture[] FullBackward =
+	{
+		new(new(0, 1, 1), new(0, 0, 1), new(0, 0)),
+		new(new(1, 1, 1), new(0, 0, 1), new(1, 0)),
+		new(new(1, 0, 1), new(0, 0, 1), new(1, 1)),
+		new(new(0, 0, 1), new(0, 0, 1), new(0, 1))
+	};
+
+	protected static readonly VertexPositionNormalTexture[] FullForward =
+	{
+		new(new(1, 1, 0), new(0, 0, -1), new(0, 0)),
+		new(new(0, 1, 0), new(0, 0, -1), new(1, 0)),
+		new(new(0, 0, 0), new(0, 0, -1), new(1, 1)),
+		new(new(1, 0, 0), new(0, 0, -1), new(0, 1))
+	};
+
 	protected VertexPositionNormalTexture[] Forward = Array.Empty<VertexPositionNormalTexture>();
 	protected VertexPositionNormalTexture[] Backward = Array.Empty<VertexPositionNormalTexture>();
 	protected VertexPositionNormalTexture[] Up = Array.Empty<VertexPositionNormalTexture>();

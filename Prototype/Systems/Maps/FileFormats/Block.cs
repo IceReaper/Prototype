@@ -49,7 +49,7 @@ public sealed class Block
 
 	private static Side? Read(Stream stream, byte mask, int index)
 	{
-		return MaskUtils.ReadBool(mask, index) ? Side.Read(stream) : null;
+		return MaskUtils.Read(mask, index) ? Side.Read(stream) : null;
 	}
 
 	public static void Write(Stream stream, Block block)
@@ -59,12 +59,12 @@ public sealed class Block
 		writer.Write(block.ShapeType);
 
 		byte outerMask = 0;
-		MaskUtils.WriteNotNull(ref outerMask, 0, block.Forward);
-		MaskUtils.WriteNotNull(ref outerMask, 1, block.Backward);
-		MaskUtils.WriteNotNull(ref outerMask, 2, block.Up);
-		MaskUtils.WriteNotNull(ref outerMask, 3, block.Down);
-		MaskUtils.WriteNotNull(ref outerMask, 4, block.Left);
-		MaskUtils.WriteNotNull(ref outerMask, 5, block.Right);
+		MaskUtils.Write(ref outerMask, 0, block.Forward != null);
+		MaskUtils.Write(ref outerMask, 1, block.Backward != null);
+		MaskUtils.Write(ref outerMask, 2, block.Up != null);
+		MaskUtils.Write(ref outerMask, 3, block.Down != null);
+		MaskUtils.Write(ref outerMask, 4, block.Left != null);
+		MaskUtils.Write(ref outerMask, 5, block.Right != null);
 		writer.Write(outerMask);
 
 		Block.Write(stream, block.Forward);
@@ -75,12 +75,12 @@ public sealed class Block
 		Block.Write(stream, block.Right);
 
 		byte innerMask = 0;
-		MaskUtils.WriteNotNull(ref innerMask, 0, block.ForwardInner);
-		MaskUtils.WriteNotNull(ref innerMask, 1, block.BackwardInner);
-		MaskUtils.WriteNotNull(ref innerMask, 2, block.UpInner);
-		MaskUtils.WriteNotNull(ref innerMask, 3, block.DownInner);
-		MaskUtils.WriteNotNull(ref innerMask, 4, block.LeftInner);
-		MaskUtils.WriteNotNull(ref innerMask, 5, block.RightInner);
+		MaskUtils.Write(ref innerMask, 0, block.ForwardInner != null);
+		MaskUtils.Write(ref innerMask, 1, block.BackwardInner != null);
+		MaskUtils.Write(ref innerMask, 2, block.UpInner != null);
+		MaskUtils.Write(ref innerMask, 3, block.DownInner != null);
+		MaskUtils.Write(ref innerMask, 4, block.LeftInner != null);
+		MaskUtils.Write(ref innerMask, 5, block.RightInner != null);
 		writer.Write(innerMask);
 
 		Block.Write(stream, block.ForwardInner);

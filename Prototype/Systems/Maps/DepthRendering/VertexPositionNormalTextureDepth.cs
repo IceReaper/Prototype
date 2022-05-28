@@ -1,4 +1,4 @@
-﻿namespace Prototype.Systems.Maps.Rendering.Depth;
+﻿namespace Prototype.Systems.Maps.DepthRendering;
 
 using Stride.Core.Mathematics;
 using Stride.Graphics;

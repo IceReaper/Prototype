@@ -5,7 +5,7 @@ using Extensions;
 using Stride.Engine;
 using Systems.Navigation;
 
-public sealed class ReserveCellComponent : SyncScript
+public sealed class OccupyCellComponent : SyncScript
 {
 	private GridComponent? gridComponent;
 	private Cell? occupyCell;
@@ -22,7 +22,7 @@ public sealed class ReserveCellComponent : SyncScript
 
 		var cell = this.gridComponent.GetCellContaining(this.Entity.Transform.Position);
 
-		if (this.occupyCell != cell)
+		if (this.occupyCell == cell)
 			return;
 
 		this.occupyCell?.Occupiers.Remove(this.Entity);

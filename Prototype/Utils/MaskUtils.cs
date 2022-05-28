@@ -2,14 +2,14 @@
 
 public static class MaskUtils
 {
-	public static void WriteNotNull(ref byte mask, int index, object? value)
-	{
-		if (value != null)
-			mask |= (byte)(1 << index);
-	}
-
-	public static bool ReadBool(byte mask, int index)
+	public static bool Read(byte mask, int index)
 	{
 		return ((mask >> index) & 1) != 0;
+	}
+
+	public static void Write(ref byte mask, int index, bool value)
+	{
+		if (value)
+			mask |= (byte)(1 << index);
 	}
 }

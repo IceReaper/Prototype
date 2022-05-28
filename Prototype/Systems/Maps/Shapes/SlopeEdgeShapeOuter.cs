@@ -37,18 +37,18 @@ public sealed class SlopeEdgeShapeOuter : Shape
 	{
 		(this.Forward, this.Backward, this.Up, this.Down, this.Left, this.Right) = rotation switch
 		{
-			3 => (new[] { Geometry.Forward[1], Geometry.Forward[2], Geometry.Forward[3] }, Array.Empty<VertexPositionNormalTexture>(),
-				Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Down[1], Geometry.Down[2], Geometry.Down[3] },
-				new[] { Geometry.Left[0], Geometry.Left[2], Geometry.Left[3] }, SlopeEdgeShapeOuter.BackwardRight),
-			2 => (new[] { Geometry.Forward[0], Geometry.Forward[2], Geometry.Forward[3] }, Array.Empty<VertexPositionNormalTexture>(),
-				Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Down[0], Geometry.Down[1], Geometry.Down[2] }, SlopeEdgeShapeOuter.BackwardLeft,
-				new[] { Geometry.Right[1], Geometry.Right[2], Geometry.Right[3] }),
-			1 => (Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Backward[0], Geometry.Backward[2], Geometry.Backward[3] },
-				Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Down[0], Geometry.Down[2], Geometry.Down[3] },
-				new[] { Geometry.Left[1], Geometry.Left[2], Geometry.Left[3] }, SlopeEdgeShapeOuter.ForwardRight),
-			0 => (Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Backward[1], Geometry.Backward[2], Geometry.Backward[3] },
-				Array.Empty<VertexPositionNormalTexture>(), new[] { Geometry.Down[0], Geometry.Down[1], Geometry.Down[3] }, SlopeEdgeShapeOuter.ForwardLeft,
-				new[] { Geometry.Right[0], Geometry.Right[2], Geometry.Right[3] }),
+			3 => (new[] { Shape.FullForward[1], Shape.FullForward[2], Shape.FullForward[3] }, Array.Empty<VertexPositionNormalTexture>(),
+				Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullDown[1], Shape.FullDown[2], Shape.FullDown[3] },
+				new[] { Shape.FullLeft[0], Shape.FullLeft[2], Shape.FullLeft[3] }, SlopeEdgeShapeOuter.BackwardRight),
+			2 => (new[] { Shape.FullForward[0], Shape.FullForward[2], Shape.FullForward[3] }, Array.Empty<VertexPositionNormalTexture>(),
+				Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullDown[0], Shape.FullDown[1], Shape.FullDown[2] }, SlopeEdgeShapeOuter.BackwardLeft,
+				new[] { Shape.FullRight[1], Shape.FullRight[2], Shape.FullRight[3] }),
+			1 => (Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullBackward[0], Shape.FullBackward[2], Shape.FullBackward[3] },
+				Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullDown[0], Shape.FullDown[2], Shape.FullDown[3] },
+				new[] { Shape.FullLeft[1], Shape.FullLeft[2], Shape.FullLeft[3] }, SlopeEdgeShapeOuter.ForwardRight),
+			0 => (Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullBackward[1], Shape.FullBackward[2], Shape.FullBackward[3] },
+				Array.Empty<VertexPositionNormalTexture>(), new[] { Shape.FullDown[0], Shape.FullDown[1], Shape.FullDown[3] }, SlopeEdgeShapeOuter.ForwardLeft,
+				new[] { Shape.FullRight[0], Shape.FullRight[2], Shape.FullRight[3] }),
 			_ => throw new InvalidOperationException()
 		};
 	}

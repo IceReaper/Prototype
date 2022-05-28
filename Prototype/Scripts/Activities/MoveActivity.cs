@@ -17,7 +17,7 @@ public sealed class MoveActivity : Activity
 	private readonly Entity entity;
 	private readonly Vector3 target;
 	private readonly GridComponent? gridComponent;
-	private readonly ReserveCellComponent? reserveCellComponent;
+	private readonly OccupyCellComponent? reserveCellComponent;
 
 	private readonly List<Cell> path = new();
 	private int unstuckTry;
@@ -29,7 +29,7 @@ public sealed class MoveActivity : Activity
 		this.target = target;
 
 		this.gridComponent = this.entity.Scene.Entities.FirstOrDefault(nameof(WorldGrid))?.Components.FirstOrDefault<GridComponent>();
-		this.reserveCellComponent = this.entity.Components.FirstOrDefault<ReserveCellComponent>();
+		this.reserveCellComponent = this.entity.Components.FirstOrDefault<OccupyCellComponent>();
 	}
 
 	protected override void UpdateInner(GameTime updateTime)
@@ -63,7 +63,7 @@ public sealed class MoveActivity : Activity
 		while (remainingDistance > 0 && this.path.Count > 0)
 		{
 			var cell = this.path[0];
-			var cellPosition = new Vector3(cell.X, cell.Y, cell.Z);
+			var cellPosition = new Vector3(cell.X + .5f, cell.Y + .5f, cell.Z + .5f);
 
 			if (!cell.Occupiers.Contains(this.entity))
 			{
@@ -103,5 +103,9 @@ public sealed class MoveActivity : Activity
 			remainingDistance -= moveDistance;
 			this.reserveCellComponent?.Update();
 		}
+	}
+
+	protected override void CancelInner()
+	{
 	}
 }

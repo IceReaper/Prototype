@@ -19,12 +19,12 @@ public sealed class SlopeShape : Shape
 			_ => throw new InvalidOperationException()
 		};
 
-		this.Forward = SlopeShape.Modify(Geometry.Forward, new[] { br, bl, 0, 0 }, true);
-		this.Backward = SlopeShape.Modify(Geometry.Backward, new[] { tl, tr, 0, 0 }, true);
-		this.Up = SlopeShape.Modify(Geometry.Up, new[] { bl, br, tr, tl }, false);
-		this.Down = Geometry.Down;
-		this.Left = SlopeShape.Modify(Geometry.Left, new[] { bl, tl, 0, 0 }, true);
-		this.Right = SlopeShape.Modify(Geometry.Right, new[] { tr, br, 0, 0 }, true);
+		this.Forward = SlopeShape.Modify(Shape.FullForward, new[] { br, bl, 0, 0 }, true);
+		this.Backward = SlopeShape.Modify(Shape.FullBackward, new[] { tl, tr, 0, 0 }, true);
+		this.Up = SlopeShape.Modify(Shape.FullUp, new[] { bl, br, tr, tl }, false);
+		this.Down = Shape.FullDown;
+		this.Left = SlopeShape.Modify(Shape.FullLeft, new[] { bl, tl, 0, 0 }, true);
+		this.Right = SlopeShape.Modify(Shape.FullRight, new[] { tr, br, 0, 0 }, true);
 	}
 
 	private static VertexPositionNormalTexture[] Modify(VertexPositionNormalTexture[] vertices, IReadOnlyList<float> heights, bool modifyUv)

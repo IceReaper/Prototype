@@ -141,7 +141,7 @@ public static class Pathfinder
 		return path.Skip(1);
 	}
 
-	private static float CalculateCost(Cell from, Cell to)
+	public static float CalculateCost(Cell from, Cell to)
 	{
 		var xDistance = Math.Abs(from.X - to.X);
 		var yDistance = Math.Abs(from.Y - to.Y);

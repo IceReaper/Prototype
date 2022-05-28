@@ -12,7 +12,7 @@ public static class Character
 	{
 		var entity = new Entity(nameof(Character))
 		{
-			new ReserveCellComponent(),
+			new OccupyCellComponent(),
 			new CharacterComponent(),
 			new ActivitySystemComponent(),
 

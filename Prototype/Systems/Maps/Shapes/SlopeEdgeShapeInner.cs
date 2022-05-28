@@ -37,16 +37,16 @@ public sealed class SlopeEdgeShapeInner : Shape
 	{
 		(this.Forward, this.Backward, this.Up, this.Down, this.Left, this.Right) = rotation switch
 		{
-			3 => (Geometry.Forward,
-				new[] { Geometry.Backward[2], Geometry.Backward[3], Geometry.Backward[0], Geometry.Right[1], Geometry.Right[2], Geometry.Right[3] },
-				new[] { Geometry.Up[0], Geometry.Up[1], Geometry.Up[3] }, Geometry.Down, Geometry.Left, SlopeEdgeShapeInner.BackwardRight),
-			2 => (Geometry.Forward,
-				new[] { Geometry.Backward[1], Geometry.Backward[2], Geometry.Backward[3], Geometry.Left[0], Geometry.Left[2], Geometry.Left[3] },
-				new[] { Geometry.Up[0], Geometry.Up[1], Geometry.Up[2] }, Geometry.Down, SlopeEdgeShapeInner.BackwardLeft, Geometry.Right),
-			1 => (new[] { Geometry.Forward[1], Geometry.Forward[2], Geometry.Forward[3], Geometry.Right[0], Geometry.Right[2], Geometry.Right[3] },
-				Geometry.Backward, new[] { Geometry.Up[0], Geometry.Up[2], Geometry.Up[3] }, Geometry.Down, Geometry.Left, SlopeEdgeShapeInner.ForwardRight),
-			0 => (new[] { Geometry.Forward[2], Geometry.Forward[3], Geometry.Forward[0], Geometry.Left[1], Geometry.Left[2], Geometry.Left[3] },
-				Geometry.Backward, new[] { Geometry.Up[1], Geometry.Up[2], Geometry.Up[3] }, Geometry.Down, SlopeEdgeShapeInner.ForwardLeft, Geometry.Right),
+			3 => (Shape.FullForward,
+				new[] { Shape.FullBackward[2], Shape.FullBackward[3], Shape.FullBackward[0], Shape.FullRight[1], Shape.FullRight[2], Shape.FullRight[3] },
+				new[] { Shape.FullUp[0], Shape.FullUp[1], Shape.FullUp[3] }, Shape.FullDown, Shape.FullLeft, SlopeEdgeShapeInner.BackwardRight),
+			2 => (Shape.FullForward,
+				new[] { Shape.FullBackward[1], Shape.FullBackward[2], Shape.FullBackward[3], Shape.FullLeft[0], Shape.FullLeft[2], Shape.FullLeft[3] },
+				new[] { Shape.FullUp[0], Shape.FullUp[1], Shape.FullUp[2] }, Shape.FullDown, SlopeEdgeShapeInner.BackwardLeft, Shape.FullRight),
+			1 => (new[] { Shape.FullForward[1], Shape.FullForward[2], Shape.FullForward[3], Shape.FullRight[0], Shape.FullRight[2], Shape.FullRight[3] },
+				Shape.FullBackward, new[] { Shape.FullUp[0], Shape.FullUp[2], Shape.FullUp[3] }, Shape.FullDown, Shape.FullLeft, SlopeEdgeShapeInner.ForwardRight),
+			0 => (new[] { Shape.FullForward[2], Shape.FullForward[3], Shape.FullForward[0], Shape.FullLeft[1], Shape.FullLeft[2], Shape.FullLeft[3] },
+				Shape.FullBackward, new[] { Shape.FullUp[1], Shape.FullUp[2], Shape.FullUp[3] }, Shape.FullDown, SlopeEdgeShapeInner.ForwardLeft, Shape.FullRight),
 			_ => throw new InvalidOperationException()
 		};
 	}

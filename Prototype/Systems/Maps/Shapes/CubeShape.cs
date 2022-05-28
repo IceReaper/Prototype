@@ -7,12 +7,12 @@ public sealed class CubeShape : Shape
 {
 	public CubeShape(Vector3 min, Vector3 max)
 	{
-		this.Forward = CubeShape.Modify(Geometry.Forward, min, max, new(1 - max.X, min.Y), new(1 - min.X, max.Y));
-		this.Backward = CubeShape.Modify(Geometry.Backward, min, max, new(min.X, min.Y), new(max.X, max.Y));
-		this.Up = CubeShape.Modify(Geometry.Up, min, max, new(min.X, min.Z), new(max.X, max.Z));
-		this.Down = CubeShape.Modify(Geometry.Down, min, max, new(min.X, min.Z), new(max.X, max.Z));
-		this.Left = CubeShape.Modify(Geometry.Left, min, max, new(min.Z, min.Y), new(max.Z, max.Y));
-		this.Right = CubeShape.Modify(Geometry.Right, min, max, new(1 - max.Z, min.Y), new(1 - min.Z, max.Y));
+		this.Forward = CubeShape.Modify(Shape.FullForward, min, max, new(1 - max.X, min.Y), new(1 - min.X, max.Y));
+		this.Backward = CubeShape.Modify(Shape.FullBackward, min, max, new(min.X, min.Y), new(max.X, max.Y));
+		this.Up = CubeShape.Modify(Shape.FullUp, min, max, new(min.X, min.Z), new(max.X, max.Z));
+		this.Down = CubeShape.Modify(Shape.FullDown, min, max, new(min.X, min.Z), new(max.X, max.Z));
+		this.Left = CubeShape.Modify(Shape.FullLeft, min, max, new(min.Z, min.Y), new(max.Z, max.Y));
+		this.Right = CubeShape.Modify(Shape.FullRight, min, max, new(1 - max.Z, min.Y), new(1 - min.Z, max.Y));
 	}
 
 	private static VertexPositionNormalTexture[] Modify(
