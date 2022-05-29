@@ -82,7 +82,11 @@ public static class GridBuilder
 
 				if (nextX - x != 0 && nextZ - z != 0)
 				{
-					// TODO check diagonals!
+					if (GridBuilder.SideIsBlocked(map.Cells[x, nextY, nextZ], nextX - x, z - nextZ))
+						continue;
+
+					if (GridBuilder.SideIsBlocked(map.Cells[nextX, nextY, z], x - nextX, nextZ - z))
+						continue;
 				}
 
 				var a = grid.Cells[x, y, z];
