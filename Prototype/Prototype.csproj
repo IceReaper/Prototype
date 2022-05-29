@@ -16,7 +16,6 @@
         <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
         <PackageReference Include="Stride.Core.Assets.CompilerApp" Version="4.1.0.1" />
         <PackageReference Include="Stride.Engine" Version="4.1.0.1" />
-        <PackageReference Include="Stride.Navigation" Version="4.1.0.1" />
         <PackageReference Include="Stride.Particles" Version="4.1.0.1" />
         <PackageReference Include="Stride.UI" Version="4.1.0.1" />
 

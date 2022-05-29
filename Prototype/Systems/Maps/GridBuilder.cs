@@ -77,7 +77,13 @@ public static class GridBuilder
 				if (nextCellIsBlocked || !nextCellHasFloor)
 					continue;
 
-				// TODO check walls!
+				if (GridBuilder.SideIsBlocked(currentCell, nextX - x, nextZ - z) || GridBuilder.SideIsBlocked(nextCell, x - nextX, z - nextZ))
+					continue;
+
+				if (nextX - x != 0 && nextZ - z != 0)
+				{
+					// TODO check diagonals!
+				}
 
 				var a = grid.Cells[x, y, z];
 				var b = grid.Cells[nextX, nextY, nextZ];
@@ -125,5 +131,54 @@ public static class GridBuilder
 			return true;
 
 		return mapCellBelow?.Block?.ShapeType is 0 or >= 1 and <= 40 && mapCellBelow.Block.Up is { IsHollow: false };
+	}
+
+	private static bool SideIsBlocked(Cell cell, int x, int z)
+	{
+		if (cell.Block == null)
+			return false;
+
+		var blockLeft = false;
+		var blockRight = false;
+		var blockForward = false;
+		var blockBackward = false;
+
+		if (cell.Block.ShapeType is >= 0 and <= 40)
+		{
+			if (x == -1)
+				blockLeft = true;
+			else if (x == 1)
+				blockRight = true;
+
+			if (z == -1)
+				blockForward = true;
+			else if (z == 1)
+				blockBackward = true;
+		}
+		else if ((cell.Block.ShapeType == 53 && x == -1) || (cell.Block.ShapeType == 54 && x == 1))
+		{
+			blockLeft = true;
+			blockRight = true;
+		}
+		else if ((cell.Block.ShapeType == 55 && z == -1) || (cell.Block.ShapeType == 56 && z == 1))
+		{
+			blockForward = true;
+			blockBackward = true;
+		}
+		else if ((cell.Block.ShapeType == 57 && x == -1 && z == -1)
+		         || (cell.Block.ShapeType == 58 && x == 1 && z == -1)
+		         || (cell.Block.ShapeType == 59 && x == 1 && z == 1)
+		         || (cell.Block.ShapeType == 60 && x == -1 && z == 1))
+		{
+			blockLeft = true;
+			blockRight = true;
+			blockForward = true;
+			blockBackward = true;
+		}
+
+		return (blockLeft && (cell.Block.Left is { IsHollow: false } || cell.Block.LeftInner is { IsHollow: false }))
+			|| (blockRight && (cell.Block.Right is { IsHollow: false } || cell.Block.RightInner is { IsHollow: false }))
+			|| (blockForward && (cell.Block.Forward is { IsHollow: false } || cell.Block.ForwardInner is { IsHollow: false }))
+			|| (blockBackward && (cell.Block.Backward is { IsHollow: false } || cell.Block.BackwardInner is { IsHollow: false }));
 	}
 }
